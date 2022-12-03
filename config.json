@@ -1,0 +1,8 @@
+{
+    "prefix": ">",
+    "embed_colors": {
+        "neutral": "0xAE4DFF",
+        "error": "0XE02B2B",
+        "success": "0x00FF00"
+    }
+}

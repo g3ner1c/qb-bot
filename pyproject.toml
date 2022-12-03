@@ -1,0 +1,7 @@
+[tool.poetry]
+name = "qb-bot"
+version = "0.0.1"
+description = "quizbowl discord bot"
+authors = ["Sky \"g3ner1c\" H. <g3ner1c-sky@pm.me>"]
+license = "AGPL-3.0-or-later"
+repository = "https://www.github.com/g3ner1c/qb-bot"
