@@ -1,5 +1,5 @@
-import discord
 from const import C_ERROR, C_SUCCESS
+import discord
 from discord.ext import commands
 from discord.ext.commands import Context
 
@@ -27,10 +27,12 @@ class Admin(commands.Cog, name="admin and dev testing commands"):
     # )
     # @commands.is_owner()
     # async def sql(self, context: Context, *, query: str) -> None:
-    #     with closing(sqlite3.connect('questions.db')) as sql:
+    #     with closing(sqlite3.connect("questions.db")) as sql:
     #         cur = sql.cursor()
 
-    #         await context.send("\n".join(["`{}`".format(row) for row in cur.execute(query).fetchall()]))
+    #         await context.send(
+    #             "\n".join(["`{}`".format(row) for row in cur.execute(query).fetchall()])
+    #         )
 
     @commands.group(
         name="ext",
@@ -66,9 +68,7 @@ class Admin(commands.Cog, name="admin and dev testing commands"):
                 await context.send(embed=embed)
                 return
 
-            embed = discord.Embed(
-                title="Load", description=f"Loaded `{ext}`", color=C_SUCCESS
-            )
+            embed = discord.Embed(title="Load", description=f"Loaded `{ext}`", color=C_SUCCESS)
             await context.send(embed=embed)
 
     @cog.command(
@@ -91,9 +91,7 @@ class Admin(commands.Cog, name="admin and dev testing commands"):
                 )
                 await context.send(embed=embed)
                 return
-            embed = discord.Embed(
-                title="Unload", description=f"Unloaded `{ext}`", color=C_SUCCESS
-            )
+            embed = discord.Embed(title="Unload", description=f"Unloaded `{ext}`", color=C_SUCCESS)
             await context.send(embed=embed)
 
     @cog.command(
@@ -116,9 +114,7 @@ class Admin(commands.Cog, name="admin and dev testing commands"):
                 )
                 await context.send(embed=embed)
                 return
-            embed = discord.Embed(
-                title="Reload", description=f"Reloaded `{ext}`", color=C_SUCCESS
-            )
+            embed = discord.Embed(title="Reload", description=f"Reloaded `{ext}`", color=C_SUCCESS)
             await context.send(embed=embed)
 
 

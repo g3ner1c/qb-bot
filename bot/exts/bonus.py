@@ -48,9 +48,7 @@ class Bonus(commands.Cog, name="bonus commands"):
         await context.send(embed=leadin)
 
         try:
-            enum = enumerate(
-                zip(bonus["parts"], bonus["answers"], bonus["formatted_answers"]), 1
-            )
+            enum = enumerate(zip(bonus["parts"], bonus["answers"], bonus["formatted_answers"]), 1)
         except KeyError:
             enum = enumerate(zip(bonus["parts"], bonus["answers"], bonus["answers"]), 1)
 
@@ -74,30 +72,22 @@ class Bonus(commands.Cog, name="bonus commands"):
                     break
 
             if answer.content.startswith(">end"):
-                await context.send(
-                    embed=discord.Embed(title="ending bonus", color=C_NEUTRAL)
-                )
+                await context.send(embed=discord.Embed(title="ending bonus", color=C_NEUTRAL))
                 return
 
             if answer.content.lower() in a.lower():  # correct
                 await context.send(
-                    embed=discord.Embed(
-                        title="Correct", description=md(fa), color=C_SUCCESS
-                    )
+                    embed=discord.Embed(title="Correct", description=md(fa), color=C_SUCCESS)
                 )
                 points += 10
 
             else:  # incorrect
                 await context.send(
-                    embed=discord.Embed(
-                        title="Incorrect", description=md(fa), color=C_ERROR
-                    )
+                    embed=discord.Embed(title="Incorrect", description=md(fa), color=C_ERROR)
                 )
 
         await context.send(
-            embed=discord.Embed(
-                title=f"{points}/{10*len(bonus['parts'])}", color=C_NEUTRAL
-            )
+            embed=discord.Embed(title=f"{points}/{10*len(bonus['parts'])}", color=C_NEUTRAL)
         )
 
     @commands.command(
@@ -147,9 +137,7 @@ class Bonus(commands.Cog, name="bonus commands"):
                     zip(bonus["parts"], bonus["answers"], bonus["formatted_answers"]), 1
                 )
             except KeyError:
-                enum = enumerate(
-                    zip(bonus["parts"], bonus["answers"], bonus["answers"]), 1
-                )
+                enum = enumerate(zip(bonus["parts"], bonus["answers"], bonus["answers"]), 1)
 
             for i, (q, a, fa) in enum:
 
@@ -174,26 +162,20 @@ class Bonus(commands.Cog, name="bonus commands"):
                     stats = discord.Embed(title="Session Stats", color=C_NEUTRAL)
                     stats.add_field(name="Bonuses", value=total_bonuses)
                     stats.add_field(name="Points", value=total_points)
-                    stats.add_field(
-                        name="PPB", value=round(total_points / total_bonuses, 2)
-                    )
+                    stats.add_field(name="PPB", value=round(total_points / total_bonuses, 2))
                     await context.send(embed=stats)
                     break
 
                 if answer.content.lower() in a.lower():  # correct
                     await context.send(
-                        embed=discord.Embed(
-                            title="Correct", description=md(fa), color=C_SUCCESS
-                        )
+                        embed=discord.Embed(title="Correct", description=md(fa), color=C_SUCCESS)
                     )
                     points += 10
                     total_points += 10
 
                 else:  # incorrect
                     await context.send(
-                        embed=discord.Embed(
-                            title="Incorrect", description=md(fa), color=C_ERROR
-                        )
+                        embed=discord.Embed(title="Incorrect", description=md(fa), color=C_ERROR)
                     )
 
             else:

@@ -4,5 +4,6 @@
         "neutral": "0xAE4DFF",
         "error": "0XE02B2B",
         "success": "0x00FF00"
-    }
+    },
+    "invite": "https://discordapp.com/oauth2/authorize?&client_id=1026526068078805003&scope=bot+applications.commands&permissions=8"
 }

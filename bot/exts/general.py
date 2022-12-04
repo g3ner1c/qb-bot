@@ -1,5 +1,5 @@
 import discord
-from const import C_NEUTRAL
+from const import C_NEUTRAL, INVITE
 from discord.ext import commands
 from discord.ext.commands import Context
 
@@ -26,7 +26,7 @@ class General(commands.Cog, name="general commands"):
     )
     async def invite(self, context: Context) -> None:
         embed = discord.Embed(
-            description=f"Invite me by clicking [here](https://discordapp.com/oauth2/authorize?&client_id=1026526068078805003&scope=bot+applications.commands&permissions=8).",
+            description=f"Invite me by clicking [here]({INVITE}).",
             color=C_NEUTRAL,
         )
         try:

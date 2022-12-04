@@ -75,9 +75,13 @@ async def on_command_error(context: Context, error) -> None:
     elif isinstance(error, commands.CommandOnCooldown):
         minutes, seconds = divmod(error.retry_after, 60)
         hours, minutes = divmod(minutes, 60)
+        hours, minutes, seconds = int(hours), int(minutes), int(seconds)
         embed = discord.Embed(
             title="command on cooldown",
-            description=f"cooldown expires in {f'{round(hours)} hours' if round(hours) > 0 else ''} {f'{round(minutes)} minutes' if round(minutes) > 0 else ''} {f'{round(seconds)} seconds' if round(seconds) > 0 else ''}.",
+            description="cooldown expires in "
+            + (f"{hours} hours " if hours > 0 else "")
+            + (f"{minutes} minutes " if minutes > 0 else "")
+            + (f"{seconds} seconds" if seconds > 0 else ""),
             color=C_ERROR,
         )
         await context.send(embed=embed)
@@ -87,7 +91,7 @@ async def on_command_error(context: Context, error) -> None:
 
 async def load_cogs() -> None:
 
-    for file in os.listdir(f"./bot/exts"):
+    for file in os.listdir("./bot/exts"):
         if file.endswith(".py"):
             ext = file[:-3]
             try:

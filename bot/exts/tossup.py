@@ -1,6 +1,6 @@
 import discord
 import requests
-from const import C_NEUTRAL, C_ERROR, C_SUCCESS
+from const import C_ERROR, C_NEUTRAL, C_SUCCESS
 from discord.ext import commands
 from discord.ext.commands import Context
 
@@ -33,9 +33,7 @@ class Tossup(commands.Cog, name="tossup commands"):
 
         tossup = requests.post(api, json=params).json()[0]
 
-        embed = discord.Embed(
-            title="Tossup", description=tossup["question"], color=C_NEUTRAL
-        )
+        embed = discord.Embed(title="Tossup", description=tossup["question"], color=C_NEUTRAL)
         await context.send(embed=embed)
 
         answer = await self.bot.wait_for(

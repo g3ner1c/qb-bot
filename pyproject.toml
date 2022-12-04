@@ -7,3 +7,23 @@ license = "AGPL-3.0-or-later"
 readme = "README.md"
 
 repository = "https://www.github.com/g3ner1c/qb-bot"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+"discord.py" = "^2.1"
+requests = "^2.28"
+
+[tool.poetry.dev-dependencies]
+flake8 = "^6.0"
+black = "^22.10"
+isort = "^5.10"
+
+[tool.black]
+line-length = 99
+
+[tool.isort]
+profile = "black"
+line_length = 99
+
+[tool.flake8]
+max_line_length = 99
