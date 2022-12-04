@@ -1,8 +1,9 @@
 import discord
 import requests
-from const import C_NEUTRAL, C_ERROR, C_SUCCESS
+from const import C_ERROR, C_NEUTRAL, C_SUCCESS
 from discord.ext import commands
 from discord.ext.commands import Context
+from markdownify import markdownify as md
 
 
 class Bonus(commands.Cog, name="bonus commands"):
@@ -24,36 +25,195 @@ class Bonus(commands.Cog, name="bonus commands"):
         points = 0
 
         leadin = discord.Embed(
-            title="Bonus", description=bonus["leadin"], color=C_NEUTRAL
+            title=bonus[
+                "subcategory"
+            ],  # without a subcat specified it defaults to category so this is fine
+            description=bonus["leadin"],
+            color=C_NEUTRAL,
         )
+
+        footer = [
+            bonus["setName"],
+            f"Packet {bonus['packetNumber']}",
+            f"Bonus {bonus['questionNumber']}",
+            f"Difficulty {bonus['difficulty']}",
+        ]
+
+        # if bonus["subcategory"] != bonus["category"]:
+        #     footer.append(bonus["subcategory"])
+
+        footer = " | ".join(footer)
+
+        leadin.set_footer(text=footer)
         await context.send(embed=leadin)
 
-        for i, (q, a) in enumerate(zip(bonus["parts"], bonus["answers"]), 1):
+        try:
+            enum = enumerate(
+                zip(bonus["parts"], bonus["answers"], bonus["formatted_answers"]), 1
+            )
+        except KeyError:
+            enum = enumerate(zip(bonus["parts"], bonus["answers"], bonus["answers"]), 1)
+
+        for i, (q, a, fa) in enum:
 
             part = discord.Embed(title=str(i), description=q, color=C_NEUTRAL)
 
             await context.send(embed=part)
 
-            answer = await self.bot.wait_for(
-                "message",
-                check=lambda message: message.author == context.author
-                and message.channel == context.channel,
-                timeout=60,
-            )
+            while True:
 
-            if answer.content.lower() in a.lower():
+                answer = await self.bot.wait_for(
+                    "message",
+                    check=lambda message: message.author == context.author
+                    and message.channel == context.channel,
+                    timeout=60,
+                )
+
+                # dont interpret as answer if message starts with _
+                if not answer.content.startswith("_"):
+                    break
+
+            if answer.content.startswith(">end"):
                 await context.send(
-                    embed=discord.Embed(title="correct", color=C_SUCCESS)
+                    embed=discord.Embed(title="ending bonus", color=C_NEUTRAL)
+                )
+                return
+
+            if answer.content.lower() in a.lower():  # correct
+                await context.send(
+                    embed=discord.Embed(
+                        title="Correct", description=md(fa), color=C_SUCCESS
+                    )
                 )
                 points += 10
-            else:
-                await context.send(embed=discord.Embed(title=a, color=C_ERROR))
+
+            else:  # incorrect
+                await context.send(
+                    embed=discord.Embed(
+                        title="Incorrect", description=md(fa), color=C_ERROR
+                    )
+                )
 
         await context.send(
             embed=discord.Embed(
                 title=f"{points}/{10*len(bonus['parts'])}", color=C_NEUTRAL
             )
         )
+
+    @commands.command(
+        name="pk",
+        description="start a pk session",
+    )
+    async def pk(self, context: Context) -> None:
+
+        api = "https://www.qbreader.org/api/random-question"
+
+        params = {"questionType": "bonus"}
+
+        total_points = 0
+        total_bonuses = 0
+
+        while True:
+
+            bonus = requests.post(api, json=params).json()[0]
+
+            points = 0
+
+            leadin = discord.Embed(
+                title=bonus[
+                    "subcategory"
+                ],  # without a subcat specified it defaults to category so this is fine
+                description=bonus["leadin"],
+                color=C_NEUTRAL,
+            )
+
+            footer = [
+                bonus["setName"],
+                f"Packet {bonus['packetNumber']}",
+                f"Bonus {bonus['questionNumber']}",
+                f"Difficulty {bonus['difficulty']}",
+            ]
+
+            # if bonus["subcategory"] != bonus["category"]:
+            #     footer.append(bonus["subcategory"])
+
+            footer = " | ".join(footer)
+
+            leadin.set_footer(text=footer)
+            await context.send(embed=leadin)
+
+            try:
+                enum = enumerate(
+                    zip(bonus["parts"], bonus["answers"], bonus["formatted_answers"]), 1
+                )
+            except KeyError:
+                enum = enumerate(
+                    zip(bonus["parts"], bonus["answers"], bonus["answers"]), 1
+                )
+
+            for i, (q, a, fa) in enum:
+
+                part = discord.Embed(title=str(i), description=q, color=C_NEUTRAL)
+
+                await context.send(embed=part)
+
+                while True:
+
+                    answer = await self.bot.wait_for(
+                        "message",
+                        check=lambda message: message.author == context.author
+                        and message.channel == context.channel,
+                        timeout=60,
+                    )
+
+                    # dont interpret as answer if message starts with _
+                    if not answer.content.startswith("_"):
+                        break
+
+                if answer.content.startswith(">end"):
+                    stats = discord.Embed(title="Session Stats", color=C_NEUTRAL)
+                    stats.add_field(name="Bonuses", value=total_bonuses)
+                    stats.add_field(name="Points", value=total_points)
+                    stats.add_field(
+                        name="PPB", value=round(total_points / total_bonuses, 2)
+                    )
+                    await context.send(embed=stats)
+                    break
+
+                if answer.content.lower() in a.lower():  # correct
+                    await context.send(
+                        embed=discord.Embed(
+                            title="Correct", description=md(fa), color=C_SUCCESS
+                        )
+                    )
+                    points += 10
+                    total_points += 10
+
+                else:  # incorrect
+                    await context.send(
+                        embed=discord.Embed(
+                            title="Incorrect", description=md(fa), color=C_ERROR
+                        )
+                    )
+
+            else:
+                total_bonuses += 1
+                await context.send(
+                    embed=discord.Embed(
+                        title=f"{points}/{10*len(bonus['parts'])}", color=C_NEUTRAL
+                    )
+                )
+                continue
+
+            break
+
+    @commands.command(
+        name="end",
+        description="ends a pk session or a bonus set",
+    )
+    async def end(self, context: Context) -> None:
+        # doesnt do anything just makes it look neat on >help
+        pass
 
 
 async def setup(bot):
