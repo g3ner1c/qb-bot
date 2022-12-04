@@ -1,6 +1,6 @@
 import discord
 import requests
-from const import C_NEUTRAL
+from const import C_NEUTRAL, C_ERROR, C_SUCCESS
 from discord.ext import commands
 from discord.ext.commands import Context
 
@@ -46,9 +46,9 @@ class Tossup(commands.Cog, name="tossup commands"):
         )
 
         if answer.content.lower() in tossup["answer"].lower():
-            await context.send("correct")
+            await context.send(embed=discord.Embed(title="correct", color=C_SUCCESS))
         else:
-            await context.send(tossup["answer"])
+            await context.send(embed=discord.Embed(title=answer, color=C_ERROR))
 
 
 async def setup(bot):
