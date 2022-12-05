@@ -1,7 +1,8 @@
 import discord
-from const import C_NEUTRAL, INVITE
 from discord.ext import commands
 from discord.ext.commands import Context
+
+from bot.lib.consts import C_NEUTRAL, INVITE
 
 
 class General(commands.Cog, name="general commands"):

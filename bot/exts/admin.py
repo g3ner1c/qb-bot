@@ -1,7 +1,8 @@
 import discord
-from const import C_ERROR, C_SUCCESS
 from discord.ext import commands
 from discord.ext.commands import Context
+
+from bot.lib.consts import C_ERROR, C_SUCCESS
 
 # import sqlite3
 # from contextlib import closing

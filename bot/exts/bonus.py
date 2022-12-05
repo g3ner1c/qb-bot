@@ -1,9 +1,10 @@
 import discord
 import requests
-from const import C_ERROR, C_NEUTRAL, C_SUCCESS
 from discord.ext import commands
 from discord.ext.commands import Context
 from markdownify import markdownify as md
+
+from bot.lib.consts import C_ERROR, C_NEUTRAL, C_SUCCESS
 
 
 class Bonus(commands.Cog, name="bonus commands"):
