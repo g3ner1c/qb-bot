@@ -2,9 +2,9 @@ import discord
 import requests
 from discord.ext import commands
 from discord.ext.commands import Context
+from lib.consts import C_ERROR, C_NEUTRAL, C_SUCCESS
+from lib.utils import parse_int_range, parse_subcats
 from markdownify import markdownify as md
-
-from bot.lib.consts import C_ERROR, C_NEUTRAL, C_SUCCESS
 
 
 class Bonus(commands.Cog, name="bonus commands"):
@@ -15,20 +15,41 @@ class Bonus(commands.Cog, name="bonus commands"):
         name="bonus",
         description="returns a random bonus",
     )
-    async def bonus(self, context: Context) -> None:
+    async def bonus(self, context: Context, *argv) -> None:
 
         api = "https://www.qbreader.org/api/random-question"
 
         params = {"questionType": "bonus"}
+
+        diffs = []
+        cats = []
+
+        for arg in argv:
+
+            if arg.isdigit():
+                diffs.append(arg)
+
+            elif arg.isalpha():
+                cats.append(arg)
+
+            else:
+                await context.send(embed=discord.Embed(title="invalid argument", color=C_ERROR))
+                return
+
+        if diffs:
+            params["difficulties"] = parse_int_range(diffs)
+
+        if cats:
+            params["subcategories"] = parse_subcats(cats)
 
         bonus = requests.post(api, json=params).json()[0]
 
         points = 0
 
         leadin = discord.Embed(
-            title=bonus[
-                "subcategory"
-            ],  # without a subcat specified it defaults to category so this is fine
+            title=bonus["category"]
+            if bonus["category"] == bonus["subcategory"]
+            else " | ".join([bonus["category"], bonus["subcategory"]]),
             description=bonus["leadin"],
             color=C_NEUTRAL,
         )
@@ -95,11 +116,32 @@ class Bonus(commands.Cog, name="bonus commands"):
         name="pk",
         description="start a pk session",
     )
-    async def pk(self, context: Context) -> None:
+    async def pk(self, context: Context, *argv) -> None:
 
         api = "https://www.qbreader.org/api/random-question"
 
         params = {"questionType": "bonus"}
+
+        diffs = []
+        cats = []
+
+        for arg in argv:
+
+            if arg.isdigit():
+                diffs.append(arg)
+
+            elif arg.isalpha():
+                cats.append(arg)
+
+            else:
+                await context.send(embed=discord.Embed(title="invalid argument", color=C_ERROR))
+                return
+
+        if diffs:
+            params["difficulties"] = parse_int_range(diffs)
+
+        if cats:
+            params["subcategories"] = parse_subcats(cats)
 
         total_points = 0
         total_bonuses = 0
@@ -111,9 +153,9 @@ class Bonus(commands.Cog, name="bonus commands"):
             points = 0
 
             leadin = discord.Embed(
-                title=bonus[
-                    "subcategory"
-                ],  # without a subcat specified it defaults to category so this is fine
+                title=bonus["category"]
+                if bonus["category"] == bonus["subcategory"]
+                else " | ".join([bonus["category"], bonus["subcategory"]]),
                 description=bonus["leadin"],
                 color=C_NEUTRAL,
             )

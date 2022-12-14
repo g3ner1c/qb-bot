@@ -2,8 +2,7 @@ import discord
 import requests
 from discord.ext import commands
 from discord.ext.commands import Context
-
-from bot.lib.consts import C_ERROR, C_NEUTRAL, C_SUCCESS
+from lib.consts import C_ERROR, C_NEUTRAL, C_SUCCESS
 
 # import sqlite3
 # from contextlib import closing

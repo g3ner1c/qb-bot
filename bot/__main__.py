@@ -7,8 +7,7 @@ import discord
 from discord.ext import commands, tasks
 from discord.ext.commands import Bot, Context
 from dotenv import load_dotenv
-
-from bot.lib.consts import C_ERROR, PREFIX
+from lib.consts import C_ERROR, PREFIX
 
 # import sqlite3
 # from contextlib import closing
