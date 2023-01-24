@@ -13,30 +13,30 @@ class Admin(commands.Cog, name="admin and dev testing commands"):
         description="kill bot",
     )
     @commands.is_owner()
-    async def shutdown(self, context: Context) -> None:
+    async def shutdown(self, ctx: Context) -> None:
         embed = discord.Embed(description="bot killed by owner", color=C_SUCCESS)
-        await context.send(embed=embed)
+        await ctx.send(embed=embed)
         await self.bot.close()
 
     @commands.group(
         name="ext",
         description="manage extensions",
     )
-    async def cog(self, context: Context) -> None:
-        if context.invoked_subcommand is None:
+    async def cog(self, ctx: Context) -> None:
+        if ctx.invoked_subcommand is None:
             embed = discord.Embed(
                 title="No subcommand provided",
                 description="Please specify a subcommand",
                 color=C_ERROR,
             )
-            await context.send(embed=embed)
+            await ctx.send(embed=embed)
 
     @cog.command(
         name="load",
         description="load extensions",
     )
     @commands.is_owner()
-    async def load(self, context: Context, *exts: str) -> None:
+    async def load(self, ctx: Context, *exts: str) -> None:
 
         for ext in exts:
 
@@ -49,18 +49,18 @@ class Admin(commands.Cog, name="admin and dev testing commands"):
                     description=f"{exception}",
                     color=C_ERROR,
                 )
-                await context.send(embed=embed)
+                await ctx.send(embed=embed)
                 return
 
             embed = discord.Embed(title="Load", description=f"Loaded `{ext}`", color=C_SUCCESS)
-            await context.send(embed=embed)
+            await ctx.send(embed=embed)
 
     @cog.command(
         name="unload",
         description="unload extensions",
     )
     @commands.is_owner()
-    async def unload(self, context: Context, *exts: str) -> None:
+    async def unload(self, ctx: Context, *exts: str) -> None:
 
         for ext in exts:
 
@@ -73,17 +73,17 @@ class Admin(commands.Cog, name="admin and dev testing commands"):
                     description=f"{exception}",
                     color=C_ERROR,
                 )
-                await context.send(embed=embed)
+                await ctx.send(embed=embed)
                 return
             embed = discord.Embed(title="Unload", description=f"Unloaded `{ext}`", color=C_SUCCESS)
-            await context.send(embed=embed)
+            await ctx.send(embed=embed)
 
     @cog.command(
         name="reload",
         description="reload extensions",
     )
     @commands.is_owner()
-    async def reload(self, context: Context, *exts: str) -> None:
+    async def reload(self, ctx: Context, *exts: str) -> None:
 
         for ext in exts:
 
@@ -96,10 +96,10 @@ class Admin(commands.Cog, name="admin and dev testing commands"):
                     description=f"{exception}",
                     color=C_ERROR,
                 )
-                await context.send(embed=embed)
+                await ctx.send(embed=embed)
                 return
             embed = discord.Embed(title="Reload", description=f"Reloaded `{ext}`", color=C_SUCCESS)
-            await context.send(embed=embed)
+            await ctx.send(embed=embed)
 
 
 async def setup(bot):

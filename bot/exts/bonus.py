@@ -15,7 +15,7 @@ class Bonus(commands.Cog, name="bonus commands"):
         name="bonus",
         description="returns a random bonus",
     )
-    async def bonus(self, context: Context, *argv) -> None:
+    async def bonus(self, ctx: Context, *argv) -> None:
 
         api = "https://www.qbreader.org/api/random-question"
 
@@ -33,7 +33,7 @@ class Bonus(commands.Cog, name="bonus commands"):
                 cats.append(arg)
 
             else:
-                await context.send(embed=discord.Embed(title="invalid argument", color=C_ERROR))
+                await ctx.send(embed=discord.Embed(title="invalid argument", color=C_ERROR))
                 return
 
         if diffs:
@@ -67,7 +67,7 @@ class Bonus(commands.Cog, name="bonus commands"):
         footer = " | ".join(footer)
 
         leadin.set_footer(text=footer)
-        await context.send(embed=leadin)
+        await ctx.send(embed=leadin)
 
         try:
             enum = enumerate(zip(bonus["parts"], bonus["answers"], bonus["formatted_answers"]), 1)
@@ -78,14 +78,14 @@ class Bonus(commands.Cog, name="bonus commands"):
 
             part = discord.Embed(title=str(i), description=q, color=C_NEUTRAL)
 
-            await context.send(embed=part)
+            await ctx.send(embed=part)
 
             while True:
 
                 answer = await self.bot.wait_for(
                     "message",
-                    check=lambda message: message.author == context.author
-                    and message.channel == context.channel,
+                    check=lambda message: message.author == ctx.author
+                    and message.channel == ctx.channel,
                     timeout=60,
                 )
 
@@ -94,21 +94,21 @@ class Bonus(commands.Cog, name="bonus commands"):
                     break
 
             if answer.content.startswith(">end"):
-                await context.send(embed=discord.Embed(title="ending bonus", color=C_NEUTRAL))
+                await ctx.send(embed=discord.Embed(title="ending bonus", color=C_NEUTRAL))
                 return
 
             if answer.content.lower() in a.lower():  # correct
-                await context.send(
+                await ctx.send(
                     embed=discord.Embed(title="Correct", description=md(fa), color=C_SUCCESS)
                 )
                 points += 10
 
             else:  # incorrect
-                await context.send(
+                await ctx.send(
                     embed=discord.Embed(title="Incorrect", description=md(fa), color=C_ERROR)
                 )
 
-        await context.send(
+        await ctx.send(
             embed=discord.Embed(title=f"{points}/{10*len(bonus['parts'])}", color=C_NEUTRAL)
         )
 
@@ -116,7 +116,7 @@ class Bonus(commands.Cog, name="bonus commands"):
         name="pk",
         description="start a pk session",
     )
-    async def pk(self, context: Context, *argv) -> None:
+    async def pk(self, ctx: Context, *argv) -> None:
 
         api = "https://www.qbreader.org/api/random-question"
 
@@ -134,7 +134,7 @@ class Bonus(commands.Cog, name="bonus commands"):
                 cats.append(arg)
 
             else:
-                await context.send(embed=discord.Embed(title="invalid argument", color=C_ERROR))
+                await ctx.send(embed=discord.Embed(title="invalid argument", color=C_ERROR))
                 return
 
         if diffs:
@@ -173,7 +173,7 @@ class Bonus(commands.Cog, name="bonus commands"):
             footer = " | ".join(footer)
 
             leadin.set_footer(text=footer)
-            await context.send(embed=leadin)
+            await ctx.send(embed=leadin)
 
             try:
                 enum = enumerate(
@@ -186,14 +186,14 @@ class Bonus(commands.Cog, name="bonus commands"):
 
                 part = discord.Embed(title=str(i), description=q, color=C_NEUTRAL)
 
-                await context.send(embed=part)
+                await ctx.send(embed=part)
 
                 while True:
 
                     answer = await self.bot.wait_for(
                         "message",
-                        check=lambda message: message.author == context.author
-                        and message.channel == context.channel,
+                        check=lambda message: message.author == ctx.author
+                        and message.channel == ctx.channel,
                         timeout=60,
                     )
 
@@ -206,24 +206,24 @@ class Bonus(commands.Cog, name="bonus commands"):
                     stats.add_field(name="Bonuses", value=total_bonuses)
                     stats.add_field(name="Points", value=total_points)
                     stats.add_field(name="PPB", value=round(total_points / total_bonuses, 2))
-                    await context.send(embed=stats)
+                    await ctx.send(embed=stats)
                     break
 
                 if answer.content.lower() in a.lower():  # correct
-                    await context.send(
+                    await ctx.send(
                         embed=discord.Embed(title="Correct", description=md(fa), color=C_SUCCESS)
                     )
                     points += 10
                     total_points += 10
 
                 else:  # incorrect
-                    await context.send(
+                    await ctx.send(
                         embed=discord.Embed(title="Incorrect", description=md(fa), color=C_ERROR)
                     )
 
             else:
                 total_bonuses += 1
-                await context.send(
+                await ctx.send(
                     embed=discord.Embed(
                         title=f"{points}/{10*len(bonus['parts'])}", color=C_NEUTRAL
                     )
@@ -236,7 +236,7 @@ class Bonus(commands.Cog, name="bonus commands"):
         name="end",
         description="ends a pk session or a bonus set",
     )
-    async def end(self, context: Context) -> None:
+    async def end(self, ctx: Context) -> None:
         # doesnt do anything just makes it look neat on >help
         pass
 

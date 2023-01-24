@@ -19,7 +19,7 @@ class Tossup(commands.Cog, name="tossup commands"):
         name="tossup",
         description="returns a random tossup",
     )
-    async def tossup(self, context: Context, *argv) -> None:
+    async def tossup(self, ctx: Context, *argv) -> None:
 
         api = "https://www.qbreader.org/api/random-question"
 
@@ -37,7 +37,7 @@ class Tossup(commands.Cog, name="tossup commands"):
                 cats.append(arg)
 
             else:
-                await context.send(embed=discord.Embed(title="invalid argument", color=C_ERROR))
+                await ctx.send(embed=discord.Embed(title="invalid argument", color=C_ERROR))
                 return
 
         if diffs:
@@ -51,7 +51,7 @@ class Tossup(commands.Cog, name="tossup commands"):
         tossup_parts = tossup_read(tossup["question"], 5)
 
         embed = discord.Embed(title="Tossup", description="", color=C_NEUTRAL)
-        tu = await context.send(embed=embed)
+        tu = await ctx.send(embed=embed)
 
         print(tossup["answer"])
 
@@ -76,8 +76,8 @@ class Tossup(commands.Cog, name="tossup commands"):
 
             await self.bot.wait_for(
                 "message",
-                check=lambda message: message.author == context.author
-                and message.channel == context.channel,
+                check=lambda message: message.author == ctx.author
+                and message.channel == ctx.channel,
                 timeout=60,
             )
 
@@ -85,22 +85,24 @@ class Tossup(commands.Cog, name="tossup commands"):
 
                 print("buzz")
 
-                await context.send(
+                await ctx.send(
                     embed=discord.Embed(
-                        title=f"Buzz from {context.author.mention}", color=C_SUCCESS
+                        title="Buzz",
+                        description="from {ctx.author.mention}",
+                        color=C_SUCCESS,
                     )
                 )
 
                 try:
                     answer = await self.bot.wait_for(
                         "message",
-                        check=lambda message: message.author == context.author
-                        and message.channel == context.channel,
+                        check=lambda message: message.author == ctx.author
+                        and message.channel == ctx.channel,
                         timeout=5,
                     )
 
                 except asyncio.TimeoutError:
-                    await context.send(embed=discord.Embed(title="no answer", color=C_ERROR))
+                    await ctx.send(embed=discord.Embed(title="no answer", color=C_ERROR))
                     print("no answer")
                     read.cancel()
                     await tu.edit(
@@ -108,14 +110,14 @@ class Tossup(commands.Cog, name="tossup commands"):
                             title="Tossup", description=tossup_parts[-1], color=C_NEUTRAL
                         )
                     )
-                    await context.send(embed=discord.Embed(title=tossup["answer"], color=C_ERROR))
+                    await ctx.send(embed=discord.Embed(title=tossup["answer"], color=C_NEUTRAL))
                     return
 
                 if answer.content.lower() in tossup["answer"].lower():
-                    await context.send(embed=discord.Embed(title="correct", color=C_SUCCESS))
+                    await ctx.send(embed=discord.Embed(title="correct", color=C_SUCCESS))
                     print("correct")
                 else:
-                    await context.send(embed=discord.Embed(title="incorrect", color=C_ERROR))
+                    await ctx.send(embed=discord.Embed(title="incorrect", color=C_ERROR))
                     print("incorrect")
 
                 read.cancel()
@@ -124,7 +126,7 @@ class Tossup(commands.Cog, name="tossup commands"):
                         title="Tossup", description=tossup_parts[-1], color=C_NEUTRAL
                     )
                 )
-                await context.send(embed=discord.Embed(title=tossup["answer"], color=C_NEUTRAL))
+                await ctx.send(embed=discord.Embed(title=tossup["answer"], color=C_NEUTRAL))
                 return
 
         asyncio.create_task(listen_for_answer())

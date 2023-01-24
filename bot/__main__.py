@@ -9,10 +9,6 @@ from discord.ext.commands import Bot, Context
 from dotenv import load_dotenv
 from lib.consts import C_ERROR, PREFIX
 
-# import sqlite3
-# from contextlib import closing
-
-
 load_dotenv()
 
 intents = discord.Intents.default()
