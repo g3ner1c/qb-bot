@@ -19,15 +19,15 @@ If you have any feature requests, feel free to open an issue or a pull request.
       - [ ] By difficulty
     - [ ] Pause and resume
   - [ ] Tossup Reading
-    - [ ] Text through messages
+    - [x] Text through messages
     - [ ] Text-to-speech in VC
   - [ ] Multiplayer
 - [ ] Bonuses
   - [x] Random bonuses
-  - [ ] PKs
+  - [x] PKs
     - [ ] Filters
-      - [ ] By categories
-      - [ ] By difficulty
+      - [x] By categories
+      - [x] By difficulty
     - [ ] Pause and resume
   - [ ] Multiplayer
 - [ ] Database Queries
@@ -35,4 +35,5 @@ If you have any feature requests, feel free to open an issue or a pull request.
     - [ ] By categories
     - [ ] By difficulty
     - [ ] By tournament and set
+- [ ] Game scoring
 - [ ] Packet reading

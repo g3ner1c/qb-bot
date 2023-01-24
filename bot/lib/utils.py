@@ -78,3 +78,29 @@ def parse_subcats(subcats: list[str]) -> list[str]:
         return [s]
 
     return sorted(set(sum(map(parse, subcats), [])))
+
+
+def tossup_read(text: str, chunk_size: int) -> list[str]:
+    """
+    Parse a tossup into a list of strings where the tossup is gradually revealed.
+
+    Examples:
+
+    ```
+    tossup_read("In quantum mechanics, the square of this quantity is equal to h-bar...", 4) ->
+    [
+        "In quantum mechanics, the",
+        "In quantum mechanics, the square of this quantity",
+        "In quantum mechanics, the square of this quantity is equal to h-bar",
+        "In quantum mechanics, the square of this quantity is equal to h-bar...",
+        ...
+    ]
+    ```
+    """
+
+    text = text.strip().replace("\n", " ").split(" ")
+    chunks = []
+    for i in range(0, len(text), chunk_size):
+        chunks.append(" ".join(text[: i + chunk_size]))
+
+    return chunks

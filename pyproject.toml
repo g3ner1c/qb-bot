@@ -31,3 +31,4 @@ line_length = 99
 
 [tool.flake8]
 max_line_length = 99
+exclude = ".vscode,.git,__pycache__,.venv"

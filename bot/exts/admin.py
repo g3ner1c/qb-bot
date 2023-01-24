@@ -3,9 +3,6 @@ from discord.ext import commands
 from discord.ext.commands import Context
 from lib.consts import C_ERROR, C_SUCCESS
 
-# import sqlite3
-# from contextlib import closing
-
 
 class Admin(commands.Cog, name="admin and dev testing commands"):
     def __init__(self, bot):
@@ -20,19 +17,6 @@ class Admin(commands.Cog, name="admin and dev testing commands"):
         embed = discord.Embed(description="bot killed by owner", color=C_SUCCESS)
         await context.send(embed=embed)
         await self.bot.close()
-
-    # @commands.command(
-    #     name="sql",
-    #     description="query sql",
-    # )
-    # @commands.is_owner()
-    # async def sql(self, context: Context, *, query: str) -> None:
-    #     with closing(sqlite3.connect("questions.db")) as sql:
-    #         cur = sql.cursor()
-
-    #         await context.send(
-    #             "\n".join(["`{}`".format(row) for row in cur.execute(query).fetchall()])
-    #         )
 
     @commands.group(
         name="ext",
