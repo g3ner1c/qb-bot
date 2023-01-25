@@ -2,7 +2,6 @@ import asyncio
 from asyncio import Lock
 
 import discord
-import requests
 from discord.ext import commands
 from discord.ext.commands import Context
 from lib.consts import C_ERROR, C_NEUTRAL, C_SUCCESS
@@ -30,7 +29,7 @@ class Tossup(commands.Cog, name="tossup commands"):
 
         for arg in argv:
 
-            if arg.isdigit():
+            if any(char.isdecimal() for char in arg):
                 diffs.append(arg)
 
             elif arg.isalpha():
@@ -46,7 +45,8 @@ class Tossup(commands.Cog, name="tossup commands"):
         if cats:
             params["subcategories"] = parse_subcats(cats)
 
-        tossup = requests.post(api, json=params).json()[0]
+        async with self.bot.session.post(api, json=params) as r:
+            tossup = (await r.json(content_type="text/html"))[0]
 
         tossup_parts = tossup_read(tossup["question"], 5)
 
@@ -77,7 +77,8 @@ class Tossup(commands.Cog, name="tossup commands"):
             await self.bot.wait_for(
                 "message",
                 check=lambda message: message.author == ctx.author
-                and message.channel == ctx.channel,
+                and message.channel == ctx.channel
+                and not message.content.startswith("_"),
                 timeout=60,
             )
 
@@ -88,7 +89,7 @@ class Tossup(commands.Cog, name="tossup commands"):
                 await ctx.send(
                     embed=discord.Embed(
                         title="Buzz",
-                        description="from {ctx.author.mention}",
+                        description=f"from {ctx.author.mention}",
                         color=C_SUCCESS,
                     )
                 )

@@ -16,6 +16,7 @@ class Admin(commands.Cog, name="admin and dev testing commands"):
     async def shutdown(self, ctx: Context) -> None:
         embed = discord.Embed(description="bot killed by owner", color=C_SUCCESS)
         await ctx.send(embed=embed)
+        await self.bot.session.close()
         await self.bot.close()
 
     @commands.group(

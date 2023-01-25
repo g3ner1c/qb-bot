@@ -4,6 +4,7 @@ import platform
 import random
 
 import discord
+from aiohttp import ClientSession
 from discord.ext import commands, tasks
 from discord.ext.commands import Bot, Context
 from dotenv import load_dotenv
@@ -23,6 +24,9 @@ bot = Bot(command_prefix=commands.when_mentioned_or(PREFIX), intents=intents)
 @bot.event
 async def on_ready() -> None:
 
+    bot.session = ClientSession(loop=bot.loop)
+    print("loaded aiohttp session")
+    print("-------------------")
     print(f"{bot.user.name}#{bot.user.discriminator}")
     print(f"discord.py {discord.__version__}")
     print(f"Python {platform.python_version()}")

@@ -1,5 +1,4 @@
 import discord
-import requests
 from discord.ext import commands
 from discord.ext.commands import Context
 from lib.consts import C_ERROR, C_NEUTRAL, C_SUCCESS
@@ -26,7 +25,7 @@ class Bonus(commands.Cog, name="bonus commands"):
 
         for arg in argv:
 
-            if arg.isdigit():
+            if any(char.isdecimal() for char in arg):
                 diffs.append(arg)
 
             elif arg.isalpha():
@@ -42,7 +41,8 @@ class Bonus(commands.Cog, name="bonus commands"):
         if cats:
             params["subcategories"] = parse_subcats(cats)
 
-        bonus = requests.post(api, json=params).json()[0]
+        async with self.bot.session.post(api, json=params) as r:
+            bonus = (await r.json(content_type="text/html"))[0]
 
         points = 0
 
@@ -80,18 +80,13 @@ class Bonus(commands.Cog, name="bonus commands"):
 
             await ctx.send(embed=part)
 
-            while True:
-
-                answer = await self.bot.wait_for(
-                    "message",
-                    check=lambda message: message.author == ctx.author
-                    and message.channel == ctx.channel,
-                    timeout=60,
-                )
-
-                # dont interpret as answer if message starts with _
-                if not answer.content.startswith("_"):
-                    break
+            answer = await self.bot.wait_for(
+                "message",
+                check=lambda message: message.author == ctx.author
+                and message.channel == ctx.channel
+                and not message.content.startswith("_"),
+                timeout=60,
+            )
 
             if answer.content.startswith(">end"):
                 await ctx.send(embed=discord.Embed(title="ending bonus", color=C_NEUTRAL))
@@ -127,7 +122,7 @@ class Bonus(commands.Cog, name="bonus commands"):
 
         for arg in argv:
 
-            if arg.isdigit():
+            if any(char.isdecimal() for char in arg):
                 diffs.append(arg)
 
             elif arg.isalpha():
@@ -148,7 +143,8 @@ class Bonus(commands.Cog, name="bonus commands"):
 
         while True:
 
-            bonus = requests.post(api, json=params).json()[0]
+            async with self.bot.session.post(api, json=params) as r:
+                bonus = (await r.json(content_type="text/html"))[0]
 
             points = 0
 
