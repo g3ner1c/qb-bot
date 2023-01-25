@@ -80,6 +80,36 @@ def parse_subcats(subcats: list[str]) -> list[str]:
     return sorted(set(sum(map(parse, subcats), [])))
 
 
+def generate_params(question_type: str, argv: list[str]) -> dict:
+    """
+    Generate paramenters for a request to the random question API.
+    """
+
+    params = {"questionType": question_type}
+
+    diffs = []
+    cats = []
+
+    for arg in argv:
+
+        if any(char.isdecimal() for char in arg):
+            diffs.append(arg)
+
+        elif arg.isalpha():
+            cats.append(arg)
+
+        else:
+            raise ValueError("Invalid argument")
+
+    if diffs:
+        params["difficulties"] = parse_int_range(diffs)
+
+    if cats:
+        params["subcategories"] = parse_subcats(cats)
+
+    return params
+
+
 def tossup_read(text: str, chunk_size: int) -> list[str]:
     """
     Parse a tossup into a list of strings where the tossup is gradually revealed.

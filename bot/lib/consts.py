@@ -9,6 +9,8 @@ C_NEUTRAL = int(config["embed_colors"]["neutral"], 16)
 C_ERROR = int(config["embed_colors"]["error"], 16)
 C_SUCCESS = int(config["embed_colors"]["success"], 16)
 
+API_RANDOM_QUESTION = "https://www.qbreader.org/api/random-question"
+
 CATEGORIES = [
     "Literature",
     "History",

@@ -4,8 +4,8 @@ from asyncio import Lock
 import discord
 from discord.ext import commands
 from discord.ext.commands import Context
-from lib.consts import C_ERROR, C_NEUTRAL, C_SUCCESS
-from lib.utils import parse_int_range, parse_subcats, tossup_read
+from lib.consts import API_RANDOM_QUESTION, C_ERROR, C_NEUTRAL, C_SUCCESS
+from lib.utils import generate_params, tossup_read
 
 lock = Lock()
 
@@ -20,32 +20,13 @@ class Tossup(commands.Cog, name="tossup commands"):
     )
     async def tossup(self, ctx: Context, *argv) -> None:
 
-        api = "https://www.qbreader.org/api/random-question"
+        try:
+            params = generate_params("tossup", argv)
+        except ValueError:
+            await ctx.send(embed=discord.Embed(title="invalid argument", color=C_ERROR))
+            return
 
-        params = {"questionType": "tossup"}
-
-        diffs = []
-        cats = []
-
-        for arg in argv:
-
-            if any(char.isdecimal() for char in arg):
-                diffs.append(arg)
-
-            elif arg.isalpha():
-                cats.append(arg)
-
-            else:
-                await ctx.send(embed=discord.Embed(title="invalid argument", color=C_ERROR))
-                return
-
-        if diffs:
-            params["difficulties"] = parse_int_range(diffs)
-
-        if cats:
-            params["subcategories"] = parse_subcats(cats)
-
-        async with self.bot.session.post(api, json=params) as r:
+        async with self.bot.session.post(API_RANDOM_QUESTION, json=params) as r:
             tossup = (await r.json(content_type="text/html"))[0]
 
         tossup_parts = tossup_read(tossup["question"], 5)

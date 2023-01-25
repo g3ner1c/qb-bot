@@ -1,3 +1,5 @@
+import os
+
 import discord
 from discord.ext import commands
 from discord.ext.commands import Context
@@ -39,6 +41,9 @@ class Admin(commands.Cog, name="admin and dev testing commands"):
     @commands.is_owner()
     async def load(self, ctx: Context, *exts: str) -> None:
 
+        if len(exts) == 1 and exts[0] == "*":
+            exts = [ext[:-3] for ext in os.listdir("./bot/exts") if ext.endswith(".py")]
+
         for ext in exts:
 
             try:
@@ -63,6 +68,9 @@ class Admin(commands.Cog, name="admin and dev testing commands"):
     @commands.is_owner()
     async def unload(self, ctx: Context, *exts: str) -> None:
 
+        if len(exts) == 1 and exts[0] == "*":
+            exts = [ext[:-3] for ext in os.listdir("./bot/exts") if ext.endswith(".py")]
+
         for ext in exts:
 
             try:
@@ -85,6 +93,9 @@ class Admin(commands.Cog, name="admin and dev testing commands"):
     )
     @commands.is_owner()
     async def reload(self, ctx: Context, *exts: str) -> None:
+
+        if len(exts) == 1 and exts[0] == "*":
+            exts = [ext[:-3] for ext in os.listdir("./bot/exts") if ext.endswith(".py")]
 
         for ext in exts:
 

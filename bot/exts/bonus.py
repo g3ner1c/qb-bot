@@ -1,8 +1,8 @@
 import discord
 from discord.ext import commands
 from discord.ext.commands import Context
-from lib.consts import C_ERROR, C_NEUTRAL, C_SUCCESS
-from lib.utils import parse_int_range, parse_subcats
+from lib.consts import API_RANDOM_QUESTION, C_ERROR, C_NEUTRAL, C_SUCCESS
+from lib.utils import generate_params
 from markdownify import markdownify as md
 
 
@@ -16,32 +16,13 @@ class Bonus(commands.Cog, name="bonus commands"):
     )
     async def bonus(self, ctx: Context, *argv) -> None:
 
-        api = "https://www.qbreader.org/api/random-question"
+        try:
+            params = generate_params("bonus", argv)
+        except ValueError:
+            await ctx.send(embed=discord.Embed(title="invalid argument", color=C_ERROR))
+            return
 
-        params = {"questionType": "bonus"}
-
-        diffs = []
-        cats = []
-
-        for arg in argv:
-
-            if any(char.isdecimal() for char in arg):
-                diffs.append(arg)
-
-            elif arg.isalpha():
-                cats.append(arg)
-
-            else:
-                await ctx.send(embed=discord.Embed(title="invalid argument", color=C_ERROR))
-                return
-
-        if diffs:
-            params["difficulties"] = parse_int_range(diffs)
-
-        if cats:
-            params["subcategories"] = parse_subcats(cats)
-
-        async with self.bot.session.post(api, json=params) as r:
+        async with self.bot.session.post(API_RANDOM_QUESTION, json=params) as r:
             bonus = (await r.json(content_type="text/html"))[0]
 
         points = 0
@@ -113,37 +94,18 @@ class Bonus(commands.Cog, name="bonus commands"):
     )
     async def pk(self, ctx: Context, *argv) -> None:
 
-        api = "https://www.qbreader.org/api/random-question"
-
-        params = {"questionType": "bonus"}
-
-        diffs = []
-        cats = []
-
-        for arg in argv:
-
-            if any(char.isdecimal() for char in arg):
-                diffs.append(arg)
-
-            elif arg.isalpha():
-                cats.append(arg)
-
-            else:
-                await ctx.send(embed=discord.Embed(title="invalid argument", color=C_ERROR))
-                return
-
-        if diffs:
-            params["difficulties"] = parse_int_range(diffs)
-
-        if cats:
-            params["subcategories"] = parse_subcats(cats)
+        try:
+            params = generate_params("bonus", argv)
+        except ValueError:
+            await ctx.send(embed=discord.Embed(title="invalid argument", color=C_ERROR))
+            return
 
         total_points = 0
         total_bonuses = 0
 
         while True:
 
-            async with self.bot.session.post(api, json=params) as r:
+            async with self.bot.session.post(API_RANDOM_QUESTION, json=params) as r:
                 bonus = (await r.json(content_type="text/html"))[0]
 
             points = 0
@@ -184,18 +146,13 @@ class Bonus(commands.Cog, name="bonus commands"):
 
                 await ctx.send(embed=part)
 
-                while True:
-
-                    answer = await self.bot.wait_for(
-                        "message",
-                        check=lambda message: message.author == ctx.author
-                        and message.channel == ctx.channel,
-                        timeout=60,
-                    )
-
-                    # dont interpret as answer if message starts with _
-                    if not answer.content.startswith("_"):
-                        break
+                answer = await self.bot.wait_for(
+                    "message",
+                    check=lambda message: message.author == ctx.author
+                    and message.channel == ctx.channel
+                    and not message.content.startswith("_"),
+                    timeout=60,
+                )
 
                 if answer.content.startswith(">end"):
                     stats = discord.Embed(title="Session Stats", color=C_NEUTRAL)
