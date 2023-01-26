@@ -110,9 +110,10 @@ def generate_params(question_type: str, argv: list[str]) -> dict:
     return params
 
 
-def tossup_read(text: str, chunk_size: int) -> list[str]:
+def tossup_read(text: str, chunk_size: int, watch_for_power: bool = True) -> list[str]:
     """
     Parse a tossup into a list of strings where the tossup is gradually revealed.
+    `watch_for_power` reads carefully around the power marker if it exists.
 
     Examples:
 
@@ -130,7 +131,21 @@ def tossup_read(text: str, chunk_size: int) -> list[str]:
 
     text = text.strip().replace("\n", " ").split(" ")
     chunks = []
+    seen_power = False
+
     for i in range(0, len(text), chunk_size):
-        chunks.append(" ".join(text[: i + chunk_size]))
+
+        next_read = text[: i + chunk_size]
+
+        if watch_for_power and not seen_power and "(*)" in next_read:
+
+            if not next_read[-1].endswith("(*)"):
+
+                power_chunk = next_read[: next_read.index("(*)") + 1]
+                chunks.append(" ".join(power_chunk))
+
+            seen_power = True
+
+        chunks.append(" ".join(next_read))
 
     return chunks

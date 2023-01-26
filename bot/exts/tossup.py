@@ -6,6 +6,7 @@ from discord.ext import commands
 from discord.ext.commands import Context
 from lib.consts import API_RANDOM_QUESTION, C_ERROR, C_NEUTRAL, C_SUCCESS
 from lib.utils import generate_params, tossup_read
+from markdownify import markdownify as md
 
 lock = Lock()
 
@@ -31,36 +32,59 @@ class Tossup(commands.Cog, name="tossup commands"):
 
         tossup_parts = tossup_read(tossup["question"], 5)
 
+        footer = [
+            tossup["setName"],
+            f"Packet {tossup['packetNumber']}",
+            f"Tossup {tossup['questionNumber']}",
+            f"Difficulty {tossup['difficulty']}",
+        ]
+
+        footer = " | ".join(footer)
+
+        can_power = asyncio.Event()
+        if "*" in tossup["question"]:
+            can_power.set()
+
+        print("power possible?", can_power.is_set())
+
         embed = discord.Embed(title="Tossup", description="", color=C_NEUTRAL)
+
+        embed.set_footer(text=footer)
         tu = await ctx.send(embed=embed)
+
+        try:
+            answer, fa = tossup["answer"], tossup["formatted_answer"]
+        except KeyError:
+            answer, fa = tossup["answer"], tossup["answer"]
 
         print(tossup["answer"])
 
-        async def edit_tossup():
+        async def edit_tossup():  # reader task
 
-            for i in range(len(tossup_parts)):
+            for part in tossup_parts:
 
                 async with lock:
 
-                    embed = discord.Embed(
-                        title="Tossup", description=tossup_parts[i], color=C_NEUTRAL
-                    )
-                    print("sending")
+                    embed = discord.Embed(title="Tossup", description=part, color=C_NEUTRAL)
+                    embed = embed.set_footer(text=footer)
                     await tu.edit(embed=embed)
-                    print("sent")
+                    if can_power.is_set() and "*" in part:
+                        print("power mark read")
+
+                        can_power.clear()
+                        print("power possible?", can_power.is_set())
 
                 await asyncio.sleep(0.8)
 
         read = asyncio.create_task(edit_tossup())
 
-        async def listen_for_answer():
+        async def listen_for_answer():  # buzzer task
 
             await self.bot.wait_for(
                 "message",
                 check=lambda message: message.author == ctx.author
                 and message.channel == ctx.channel
                 and not message.content.startswith("_"),
-                timeout=60,
             )
 
             async with lock:
@@ -76,7 +100,7 @@ class Tossup(commands.Cog, name="tossup commands"):
                 )
 
                 try:
-                    answer = await self.bot.wait_for(
+                    response = await self.bot.wait_for(
                         "message",
                         check=lambda message: message.author == ctx.author
                         and message.channel == ctx.channel,
@@ -90,14 +114,22 @@ class Tossup(commands.Cog, name="tossup commands"):
                     await tu.edit(
                         embed=discord.Embed(
                             title="Tossup", description=tossup_parts[-1], color=C_NEUTRAL
-                        )
+                        ).set_footer(text=footer)
                     )
-                    await ctx.send(embed=discord.Embed(title=tossup["answer"], color=C_NEUTRAL))
+                    await ctx.send(embed=discord.Embed(title=md(fa), color=C_NEUTRAL))
                     return
 
-                if answer.content.lower() in tossup["answer"].lower():
+                if response.content.lower() in answer.lower():
                     await ctx.send(embed=discord.Embed(title="correct", color=C_SUCCESS))
                     print("correct")
+                    print("power possible?", can_power.is_set())
+                    if can_power.is_set():
+                        await ctx.send(
+                            embed=discord.Embed(
+                                title="power",
+                                color=C_SUCCESS,
+                            )
+                        )
                 else:
                     await ctx.send(embed=discord.Embed(title="incorrect", color=C_ERROR))
                     print("incorrect")
@@ -106,9 +138,9 @@ class Tossup(commands.Cog, name="tossup commands"):
                 await tu.edit(
                     embed=discord.Embed(
                         title="Tossup", description=tossup_parts[-1], color=C_NEUTRAL
-                    )
+                    ).set_footer(text=footer)
                 )
-                await ctx.send(embed=discord.Embed(title=tossup["answer"], color=C_NEUTRAL))
+                await ctx.send(embed=discord.Embed(title=md(fa), color=C_NEUTRAL))
                 return
 
         asyncio.create_task(listen_for_answer())
