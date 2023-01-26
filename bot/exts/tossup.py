@@ -147,6 +147,13 @@ class Tossup(commands.Cog, name="tossup commands"):
 
         asyncio.create_task(listen_for_answer())
 
+    @commands.command(
+        name="tu",
+        description="alias for tossup",
+    )
+    async def tu(self, ctx: Context, *argv) -> None:
+        await self.tossup(ctx, *argv)
+
 
 async def setup(bot):
     await bot.add_cog(Tossup(bot))
