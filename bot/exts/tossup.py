@@ -1,3 +1,5 @@
+"""Tossup commands."""
+
 import asyncio
 from asyncio import Lock
 

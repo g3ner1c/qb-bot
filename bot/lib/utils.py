@@ -1,3 +1,5 @@
+"""Helper functions."""
+
 from lib.consts import ALIASES, ALL_ALIASES, CATEGORIES, SUBCATEGORIES
 
 

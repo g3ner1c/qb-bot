@@ -1,3 +1,5 @@
+"""Constants and aliases."""
+
 from json import load
 
 with open("config.json") as file:

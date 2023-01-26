@@ -1,3 +1,5 @@
+"""Developer commands."""
+
 import os
 
 import discord
