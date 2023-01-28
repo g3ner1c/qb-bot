@@ -102,12 +102,14 @@ class Tossup(commands.Cog, name="tossup commands"):
                 )
 
                 try:
-                    answer = await self.bot.wait_for(
-                        "message",
-                        check=lambda message: message.author == ctx.author
-                        and message.channel == ctx.channel,
-                        timeout=5,
-                    )
+                    answer = (
+                        await self.bot.wait_for(
+                            "message",
+                            check=lambda message: message.author == ctx.author
+                            and message.channel == ctx.channel,
+                            timeout=5,
+                        )
+                    ).content
 
                 except asyncio.TimeoutError:
                     await ctx.send(embed=discord.Embed(title="no answer", color=C_ERROR))
@@ -123,7 +125,7 @@ class Tossup(commands.Cog, name="tossup commands"):
 
                 while True:
 
-                    match await check_answer(a, answer.content, self.bot.session):
+                    match await check_answer(a, answer, self.bot.session):
 
                         case "accept":
                             await ctx.send(embed=discord.Embed(title="correct", color=C_SUCCESS))
@@ -148,12 +150,14 @@ class Tossup(commands.Cog, name="tossup commands"):
                             print("prompt")
 
                             try:
-                                answer = await self.bot.wait_for(
-                                    "message",
-                                    check=lambda message: message.author == ctx.author
-                                    and message.channel == ctx.channel,
-                                    timeout=5,
-                                )
+                                answer = (
+                                    await self.bot.wait_for(
+                                        "message",
+                                        check=lambda message: message.author == ctx.author
+                                        and message.channel == ctx.channel,
+                                        timeout=5,
+                                    )
+                                ).content
 
                             except asyncio.TimeoutError:
                                 await ctx.send(

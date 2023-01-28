@@ -1,7 +1,6 @@
 """Bonus commands."""
 
 import discord
-from discord import Message
 from discord.ext import commands
 from discord.ext.commands import Context
 from lib.consts import API_RANDOM_QUESTION, C_ERROR, C_NEUTRAL, C_SUCCESS
@@ -64,21 +63,23 @@ class Bonus(commands.Cog, name="bonus commands"):
 
             await ctx.send(embed=part)
 
-            answer: Message = await self.bot.wait_for(
-                "message",
-                check=lambda message: message.author == ctx.author
-                and message.channel == ctx.channel
-                and not message.content.startswith("_"),
-                timeout=60,
-            )
+            answer = (
+                await self.bot.wait_for(
+                    "message",
+                    check=lambda message: message.author == ctx.author
+                    and message.channel == ctx.channel
+                    and not message.content.startswith("_"),
+                    timeout=60,
+                )
+            ).content
 
             while True:
 
-                if answer.content.startswith(">end"):
+                if answer.startswith(">end"):
                     await ctx.send(embed=discord.Embed(title="ending bonus", color=C_NEUTRAL))
                     return
 
-                match await check_answer(a, answer.content, self.bot.session):
+                match await check_answer(a, answer, self.bot.session):
 
                     case "accept":  # correct
                         await ctx.send(
@@ -99,13 +100,15 @@ class Bonus(commands.Cog, name="bonus commands"):
 
                     case "prompt":  # prompt
                         await ctx.send(embed=discord.Embed(title="Prompt", color=C_NEUTRAL))
-                        answer = await self.bot.wait_for(
-                            "message",
-                            check=lambda message: message.author == ctx.author
-                            and message.channel == ctx.channel
-                            and not message.content.startswith("_"),
-                            timeout=60,
-                        )
+                        answer = (
+                            await self.bot.wait_for(
+                                "message",
+                                check=lambda message: message.author == ctx.author
+                                and message.channel == ctx.channel
+                                and not message.content.startswith("_"),
+                                timeout=60,
+                            )
+                        ).content
 
         await ctx.send(
             embed=discord.Embed(title=f"{points}/{10*len(bonus['parts'])}", color=C_NEUTRAL)
@@ -167,17 +170,19 @@ class Bonus(commands.Cog, name="bonus commands"):
 
                 await ctx.send(embed=part)
 
-                answer: Message = await self.bot.wait_for(
-                    "message",
-                    check=lambda message: message.author == ctx.author
-                    and message.channel == ctx.channel
-                    and not message.content.startswith("_"),
-                    timeout=60,
-                )
+                answer = (
+                    await self.bot.wait_for(
+                        "message",
+                        check=lambda message: message.author == ctx.author
+                        and message.channel == ctx.channel
+                        and not message.content.startswith("_"),
+                        timeout=60,
+                    )
+                ).content
 
                 while True:
 
-                    if answer.content.startswith(">end"):
+                    if answer.startswith(">end"):
                         stats = discord.Embed(title="Session Stats", color=C_NEUTRAL)
                         stats.add_field(name="Bonuses", value=total_bonuses)
                         stats.add_field(name="Points", value=total_points)
@@ -185,7 +190,7 @@ class Bonus(commands.Cog, name="bonus commands"):
                         await ctx.send(embed=stats)
                         return
 
-                    match await check_answer(a, answer.content, self.bot.session):
+                    match await check_answer(a, answer, self.bot.session):
 
                         case "accept":  # correct
                             await ctx.send(
@@ -207,13 +212,15 @@ class Bonus(commands.Cog, name="bonus commands"):
 
                         case "prompt":  # prompt
                             await ctx.send(embed=discord.Embed(title="Prompt", color=C_NEUTRAL))
-                            answer = await self.bot.wait_for(
-                                "message",
-                                check=lambda message: message.author == ctx.author
-                                and message.channel == ctx.channel
-                                and not message.content.startswith("_"),
-                                timeout=60,
-                            )
+                            answer = (
+                                await self.bot.wait_for(
+                                    "message",
+                                    check=lambda message: message.author == ctx.author
+                                    and message.channel == ctx.channel
+                                    and not message.content.startswith("_"),
+                                    timeout=60,
+                                )
+                            ).content
 
             total_bonuses += 1
             await ctx.send(
