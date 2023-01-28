@@ -1,5 +1,6 @@
 """Helper functions."""
 
+import aiohttp
 from lib.consts import ALIASES, ALL_ALIASES, CATEGORIES, SUBCATEGORIES
 
 
@@ -151,3 +152,17 @@ def tossup_read(text: str, chunk_size: int, watch_for_power: bool = True) -> lis
         chunks.append(" ".join(next_read))
 
     return chunks
+
+
+async def check_answer(answerline: str, answer: str, client: aiohttp.ClientSession) -> str:
+    """
+    Check if an answer is correct using the QB Reader API.
+
+    Returns "accept", "reject", and "prompt"
+    """
+
+    async with client.get(
+        "https://www.qbreader.org/api/check-answer",
+        params={"answerline": answerline, "givenAnswer": answer},
+    ) as r:
+        return await r.json(content_type="text/html")

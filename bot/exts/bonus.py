@@ -1,10 +1,11 @@
 """Bonus commands."""
 
 import discord
+from discord import Message
 from discord.ext import commands
 from discord.ext.commands import Context
 from lib.consts import API_RANDOM_QUESTION, C_ERROR, C_NEUTRAL, C_SUCCESS
-from lib.utils import generate_params
+from lib.utils import check_answer, generate_params
 from markdownify import markdownify as md
 
 
@@ -53,17 +54,17 @@ class Bonus(commands.Cog, name="bonus commands"):
         await ctx.send(embed=leadin)
 
         try:
-            enum = enumerate(zip(bonus["parts"], bonus["answers"], bonus["formatted_answers"]), 1)
+            enum = enumerate(zip(bonus["parts"], bonus["formatted_answers"]), 1)
         except KeyError:
-            enum = enumerate(zip(bonus["parts"], bonus["answers"], bonus["answers"]), 1)
+            enum = enumerate(zip(bonus["parts"], bonus["answers"]), 1)
 
-        for i, (q, a, fa) in enum:
+        for i, (q, a) in enum:
 
             part = discord.Embed(title=str(i), description=q, color=C_NEUTRAL)
 
             await ctx.send(embed=part)
 
-            answer = await self.bot.wait_for(
+            answer: Message = await self.bot.wait_for(
                 "message",
                 check=lambda message: message.author == ctx.author
                 and message.channel == ctx.channel
@@ -71,20 +72,40 @@ class Bonus(commands.Cog, name="bonus commands"):
                 timeout=60,
             )
 
-            if answer.content.startswith(">end"):
-                await ctx.send(embed=discord.Embed(title="ending bonus", color=C_NEUTRAL))
-                return
+            while True:
 
-            if answer.content.lower() in a.lower():  # correct
-                await ctx.send(
-                    embed=discord.Embed(title="Correct", description=md(fa), color=C_SUCCESS)
-                )
-                points += 10
+                if answer.content.startswith(">end"):
+                    await ctx.send(embed=discord.Embed(title="ending bonus", color=C_NEUTRAL))
+                    return
 
-            else:  # incorrect
-                await ctx.send(
-                    embed=discord.Embed(title="Incorrect", description=md(fa), color=C_ERROR)
-                )
+                match await check_answer(a, answer.content, self.bot.session):
+
+                    case "accept":  # correct
+                        await ctx.send(
+                            embed=discord.Embed(
+                                title="Correct", description=md(a), color=C_SUCCESS
+                            )
+                        )
+                        points += 10
+                        break
+
+                    case "reject":  # incorrect
+                        await ctx.send(
+                            embed=discord.Embed(
+                                title="Incorrect", description=md(a), color=C_ERROR
+                            )
+                        )
+                        break
+
+                    case "prompt":  # prompt
+                        await ctx.send(embed=discord.Embed(title="Prompt", color=C_NEUTRAL))
+                        answer = await self.bot.wait_for(
+                            "message",
+                            check=lambda message: message.author == ctx.author
+                            and message.channel == ctx.channel
+                            and not message.content.startswith("_"),
+                            timeout=60,
+                        )
 
         await ctx.send(
             embed=discord.Embed(title=f"{points}/{10*len(bonus['parts'])}", color=C_NEUTRAL)
@@ -136,19 +157,17 @@ class Bonus(commands.Cog, name="bonus commands"):
             await ctx.send(embed=leadin)
 
             try:
-                enum = enumerate(
-                    zip(bonus["parts"], bonus["answers"], bonus["formatted_answers"]), 1
-                )
+                enum = enumerate(zip(bonus["parts"], bonus["formatted_answers"]), 1)
             except KeyError:
-                enum = enumerate(zip(bonus["parts"], bonus["answers"], bonus["answers"]), 1)
+                enum = enumerate(zip(bonus["parts"], bonus["answers"]), 1)
 
-            for i, (q, a, fa) in enum:
+            for i, (q, a) in enum:
 
                 part = discord.Embed(title=str(i), description=q, color=C_NEUTRAL)
 
                 await ctx.send(embed=part)
 
-                answer = await self.bot.wait_for(
+                answer: Message = await self.bot.wait_for(
                     "message",
                     check=lambda message: message.author == ctx.author
                     and message.channel == ctx.channel
@@ -156,36 +175,50 @@ class Bonus(commands.Cog, name="bonus commands"):
                     timeout=60,
                 )
 
-                if answer.content.startswith(">end"):
-                    stats = discord.Embed(title="Session Stats", color=C_NEUTRAL)
-                    stats.add_field(name="Bonuses", value=total_bonuses)
-                    stats.add_field(name="Points", value=total_points)
-                    stats.add_field(name="PPB", value=round(total_points / total_bonuses, 2))
-                    await ctx.send(embed=stats)
-                    break
+                while True:
 
-                if answer.content.lower() in a.lower():  # correct
-                    await ctx.send(
-                        embed=discord.Embed(title="Correct", description=md(fa), color=C_SUCCESS)
-                    )
-                    points += 10
-                    total_points += 10
+                    if answer.content.startswith(">end"):
+                        stats = discord.Embed(title="Session Stats", color=C_NEUTRAL)
+                        stats.add_field(name="Bonuses", value=total_bonuses)
+                        stats.add_field(name="Points", value=total_points)
+                        stats.add_field(name="PPB", value=round(total_points / total_bonuses, 2))
+                        await ctx.send(embed=stats)
+                        return
 
-                else:  # incorrect
-                    await ctx.send(
-                        embed=discord.Embed(title="Incorrect", description=md(fa), color=C_ERROR)
-                    )
+                    match await check_answer(a, answer.content, self.bot.session):
 
-            else:
-                total_bonuses += 1
-                await ctx.send(
-                    embed=discord.Embed(
-                        title=f"{points}/{10*len(bonus['parts'])}", color=C_NEUTRAL
-                    )
-                )
-                continue
+                        case "accept":  # correct
+                            await ctx.send(
+                                embed=discord.Embed(
+                                    title="Correct", description=md(a), color=C_SUCCESS
+                                )
+                            )
+                            points += 10
+                            total_points += 10
+                            break
 
-            break
+                        case "reject":  # incorrect
+                            await ctx.send(
+                                embed=discord.Embed(
+                                    title="Incorrect", description=md(a), color=C_ERROR
+                                )
+                            )
+                            break
+
+                        case "prompt":  # prompt
+                            await ctx.send(embed=discord.Embed(title="Prompt", color=C_NEUTRAL))
+                            answer = await self.bot.wait_for(
+                                "message",
+                                check=lambda message: message.author == ctx.author
+                                and message.channel == ctx.channel
+                                and not message.content.startswith("_"),
+                                timeout=60,
+                            )
+
+            total_bonuses += 1
+            await ctx.send(
+                embed=discord.Embed(title=f"{points}/{10*len(bonus['parts'])}", color=C_NEUTRAL)
+            )
 
     @commands.command(
         name="end",
