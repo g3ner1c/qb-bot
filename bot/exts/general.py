@@ -36,6 +36,14 @@ class General(commands.Cog, name="general commands"):
         except discord.Forbidden:
             await ctx.send(embed=embed)
 
+    @commands.command(
+        name="end",
+        description="ends a question or question session",
+    )
+    async def end(self, ctx: Context) -> None:
+        # doesnt do anything just makes it look neat on >help
+        pass
+
 
 async def setup(bot):
     await bot.add_cog(General(bot))

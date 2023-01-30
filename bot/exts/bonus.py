@@ -65,7 +65,7 @@ class Bonus(commands.Cog, name="bonus commands"):
             while True:
 
                 if answer.startswith(">end"):
-                    return "user ended bonus"
+                    return "ended by user"
 
                 match await check_answer(a, answer, self.bot.session):
 
@@ -114,7 +114,7 @@ class Bonus(commands.Cog, name="bonus commands"):
 
         points = await self.play_bonus(ctx, params)
 
-        if points == "user ended bonus":
+        if points == "ended by user":
             await ctx.send(embed=discord.Embed(title="ending bonus", color=C_NEUTRAL))
             return
 
@@ -139,12 +139,19 @@ class Bonus(commands.Cog, name="bonus commands"):
 
             points = await self.play_bonus(ctx, params)
 
-            if points == "user ended bonus":
+            if points == "ended by user":
 
                 stats = discord.Embed(title="Session Stats", color=C_NEUTRAL)
                 stats.add_field(name="Bonuses", value=total_bonuses)
                 stats.add_field(name="Points", value=total_points)
-                stats.add_field(name="PPB", value=round(total_points / total_bonuses, 2))
+
+                try:
+                    stats.add_field(name="PPB", value=round(total_points / total_bonuses, 2))
+                except ZeroDivisionError:
+                    stats.add_field(
+                        name="PPB", value="why would you even start a session just to end it?"
+                    )
+
                 await ctx.send(embed=stats)
                 return
 
@@ -152,14 +159,6 @@ class Bonus(commands.Cog, name="bonus commands"):
             total_bonuses += 1
 
             await ctx.send(embed=discord.Embed(title=f"{points}/30", color=C_NEUTRAL))
-
-    @commands.command(
-        name="end",
-        description="ends a pk session or a bonus set",
-    )
-    async def end(self, ctx: Context) -> None:
-        # doesnt do anything just makes it look neat on >help
-        pass
 
 
 async def setup(bot):
