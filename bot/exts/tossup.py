@@ -1,7 +1,6 @@
 """Tossup commands."""
 
 import asyncio
-from asyncio import Lock
 
 import discord
 from discord.ext import commands
@@ -10,7 +9,7 @@ from lib.consts import API_RANDOM_QUESTION, C_ERROR, C_NEUTRAL, C_SUCCESS
 from lib.utils import check_answer, generate_params, tossup_read
 from markdownify import markdownify as md
 
-lock = Lock()
+lock = asyncio.Lock()
 
 
 class Tossup(commands.Cog, name="tossup commands"):
