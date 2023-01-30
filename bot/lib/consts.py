@@ -1,9 +1,17 @@
 """Constants and aliases."""
 
 from json import load
+from os import path
 
-with open("config.json") as file:
-    config = load(file)
+CONFIG_PATH = "config.json"
+
+if not path.exists(CONFIG_PATH):
+    with open(CONFIG_PATH, "w") as f:
+        with open("config_default.json") as default:
+            f.write(default.read())
+
+with open(CONFIG_PATH) as f:
+    config = load(f)
 
 PREFIX = config["prefix"]
 INVITE = config["invite"]
@@ -72,8 +80,8 @@ ALIASES = {
     "Biology": ["bio"],
     "Chemistry": ["chem"],
     "Physics": ["phys"],
-    "Math": ["math"],
-    "Other Science": ["other sci"],
+    "Math": ["mathematics", "maths"],
+    "Other Science": ["other sci"],  # no cs :(
     "Fine Arts": ["fa", "arts", "fine art"],
     "Visual Fine Arts": ["vfa", "vis fa", "vis arts", "vis fine art"],
     "Auditory Fine Arts": ["afa", "audio fa", "audio arts", "audio fine art"],
