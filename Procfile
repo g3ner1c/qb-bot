@@ -1,1 +1,1 @@
-run: poetry run python bot/
+run: python bot/
