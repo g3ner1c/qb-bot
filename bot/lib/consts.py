@@ -1,11 +1,37 @@
 """Constants and aliases."""
 
+import os
 from json import load
-from os import path
+
+try:
+
+    from dotenv import load_dotenv
+
+    load_dotenv()
+
+except ImportError:
+
+    if os.path.exists(".env"):
+        print(
+            ".env file found but dotenv is not installed, please install the dev dependencies with 'poetry install'"  # noqa: E501
+        )
+        exit(1)
+
+
+CLIENT_ID = os.getenv("CLIENT_ID")
+INVITE = f"https://discord.com/api/oauth2/authorize?client_id={CLIENT_ID}&permissions=8&scope=bot"
+
+TOKEN = os.getenv("TOKEN")
+
+if TOKEN is None:
+    print(
+        "no token found, please add a token to a .env file or set the TOKEN environment variable"
+    )
+    exit(1)
 
 CONFIG_PATH = "config.json"
 
-if not path.exists(CONFIG_PATH):
+if not os.path.exists(CONFIG_PATH):
     with open(CONFIG_PATH, "w") as f:
         with open("config_default.json") as default:
             f.write(default.read())
@@ -14,7 +40,6 @@ with open(CONFIG_PATH) as f:
     config = load(f)
 
 PREFIX = config["prefix"]
-INVITE = config["invite"]
 C_NEUTRAL = int(config["embed_colors"]["neutral"], 16)
 C_ERROR = int(config["embed_colors"]["error"], 16)
 C_SUCCESS = int(config["embed_colors"]["success"], 16)
