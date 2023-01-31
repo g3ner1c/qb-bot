@@ -7,10 +7,22 @@ import discord
 from aiohttp import ClientSession
 from discord.ext import commands, tasks
 from discord.ext.commands import Bot, Context
-from dotenv import load_dotenv
 from lib.consts import C_ERROR, PREFIX
 
-load_dotenv()
+try:
+
+    from dotenv import load_dotenv
+
+    load_dotenv()
+
+except ImportError:
+
+    if os.path.exists(".env"):
+        print(
+            ".env file found but dotenv is not installed, please install the dev dependencies with 'poetry install'"  # noqa: E501
+        )
+        exit(1)
+
 
 intents = discord.Intents.default()
 
@@ -103,4 +115,11 @@ async def load_cogs() -> None:
 
 
 asyncio.run(load_cogs())
-bot.run(os.getenv("TOKEN"))
+
+TOKEN = os.getenv("TOKEN")
+if TOKEN is None:
+    print(
+        "no token found, please add a token to a .env file or set the TOKEN environment variable"
+    )
+    exit(1)
+bot.run(TOKEN)

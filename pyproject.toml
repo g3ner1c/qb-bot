@@ -12,7 +12,6 @@ repository = "https://www.github.com/g3ner1c/qb-bot"
 python = "^3.10"
 "discord.py" = "^2.1"
 markdownify = "^0.11"
-python-dotenv = "^0.21"
 aiohttp = "^3.8"
 aiodns = "^3.0"
 
@@ -22,6 +21,7 @@ flake8 = "^6.0"
 isort = "^5.10"
 black = "^22.10"
 pre-commit = "^2.20"
+python-dotenv = "^0.21"
 
 [tool.black]
 line-length = 99
