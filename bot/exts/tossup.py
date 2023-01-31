@@ -80,7 +80,7 @@ class Tossup(commands.Cog, name="tossup commands"):
                 timeout=60,  # no idea how i should make the tossup go dead yet
             )
 
-            if buzz.content.startswith(">end"):
+            if buzz.content.startswith(f"{ctx.prefix}end"):
                 read.cancel()
                 await tu.edit(
                     embed=discord.Embed(
@@ -125,7 +125,7 @@ class Tossup(commands.Cog, name="tossup commands"):
 
                 while True:
 
-                    if answer.startswith(">end"):
+                    if answer.startswith(f"{ctx.prefix}end"):
                         read.cancel()
                         await tu.edit(
                             embed=discord.Embed(
@@ -211,6 +211,30 @@ class Tossup(commands.Cog, name="tossup commands"):
             case "neg":
                 await ctx.send(embed=discord.Embed(title="neg", color=C_ERROR))
 
+    async def send_tk_end_stats(self, ctx: Context, stats: dict[str, int]) -> None:
+
+        embed = discord.Embed(title="Session Stats", color=C_NEUTRAL)
+        embed.add_field(name="Tossups", value=sum(stats.values()))
+        embed.add_field(
+            name="Powers/10s/Negs",
+            value=f"{stats['power']}/{stats['correct']}/{stats['neg']}",
+        )
+        embed.add_field(name="No Answer", value=stats["no answer"])
+
+        points = stats["power"] * 15 + stats["correct"] * 10 - stats["neg"] * 5
+
+        embed.add_field(name="Points", value=points)
+
+        try:
+            embed.add_field(name="PP20TUH", value=round(points / sum(stats.values()) * 20, 2))
+        except ZeroDivisionError:
+            embed.add_field(
+                name="PP20TUH",
+                value="wow you really just started a session and ended it immediately",
+            )
+
+        await ctx.send(embed=embed)
+
     @commands.command(
         name="tk",
         description="start a tk session",
@@ -230,32 +254,7 @@ class Tossup(commands.Cog, name="tossup commands"):
             match await self.play_tossup(ctx, params):
 
                 case "ended by user":
-
-                    stats = discord.Embed(title="Session Stats", color=C_NEUTRAL)
-                    stats.add_field(name="Tossups", value=sum(tk_stats.values()))
-                    stats.add_field(
-                        name="Powers/10s/Negs",
-                        value=f"{tk_stats['power']}/{tk_stats['correct']}/{tk_stats['neg']}",
-                    )
-                    stats.add_field(name="No Answer", value=tk_stats["no answer"])
-
-                    points = (
-                        tk_stats["power"] * 15 + tk_stats["correct"] * 10 - tk_stats["neg"] * 5
-                    )
-
-                    stats.add_field(name="Points", value=points)
-
-                    try:
-                        stats.add_field(
-                            name="PP20TUH", value=round(points / sum(tk_stats.values()) * 20, 2)
-                        )
-                    except ZeroDivisionError:
-                        stats.add_field(
-                            name="PP20TUH",
-                            value="wow you really just started a session and ended it immediately",
-                        )
-
-                    await ctx.send(embed=stats)
+                    await self.send_tk_end_stats(ctx, tk_stats)
                     return
 
                 case "no answer":
@@ -274,7 +273,19 @@ class Tossup(commands.Cog, name="tossup commands"):
                     tk_stats["neg"] += 1
                     await ctx.send(embed=discord.Embed(title="neg", color=C_ERROR))
 
-            await asyncio.sleep(4)  # wait 4 seconds before next tossup to give time to read answer
+            try:
+                await self.bot.wait_for(
+                    "message",
+                    check=lambda message: message.author == ctx.author
+                    and message.channel == ctx.channel
+                    and message.content == f"{ctx.prefix}end",
+                    timeout=4,
+                )  # wait 4 seconds before next tossup to give time to read answer
+                await self.send_tk_end_stats(ctx, tk_stats)
+                return
+
+            except asyncio.TimeoutError:
+                pass
 
     @commands.command(
         name="tu",

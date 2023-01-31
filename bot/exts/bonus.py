@@ -64,7 +64,7 @@ class Bonus(commands.Cog, name="bonus commands"):
 
             while True:
 
-                if answer.startswith(">end"):
+                if answer.startswith(f"{ctx.prefix}end"):
                     return "ended by user"
 
                 match await check_answer(a, answer, self.bot.session):
