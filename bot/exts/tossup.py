@@ -59,7 +59,8 @@ class Tossup(commands.Cog, name="tossup commands"):
                     embed = discord.Embed(title="Tossup", description=part, color=C_NEUTRAL)
                     embed = embed.set_footer(text=footer)
                     await tu.edit(embed=embed)
-                    if can_power.is_set() and "*" in part:
+                    if can_power.is_set() and "*" in part and not part.endswith("(*)"):
+                        # include powers right on power mark
                         print("power mark read")
 
                         can_power.clear()
