@@ -52,8 +52,12 @@ class General(commands.Cog, name="general commands"):
     )
     async def uptime(self, ctx: Context) -> None:
         embed = discord.Embed(title="Status", color=C_NEUTRAL)
-        embed.add_field(name="Uptime", value=str(datetime.utcnow() - self.bot.start_time))
-        embed.add_field(name="Last restart (UTC)", value=f"`{str(self.bot.start_time)}`")
+        embed.add_field(
+            name="Uptime", value=f"`{str(datetime.utcnow() - self.bot.start_time)}`", inline=False
+        )
+        embed.add_field(
+            name="Last restart (UTC)", value=f"`{str(self.bot.start_time)}`", inline=False
+        )
         await ctx.send(embed=embed)
 
     @commands.command(
