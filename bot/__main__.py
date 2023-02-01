@@ -2,6 +2,7 @@ import asyncio
 import os
 import platform
 import random
+from datetime import datetime
 
 import discord
 from aiohttp import ClientSession
@@ -22,6 +23,7 @@ bot = Bot(command_prefix=commands.when_mentioned_or(PREFIX), intents=intents)
 async def on_ready() -> None:
 
     bot.session = ClientSession(loop=bot.loop)
+    bot.start_time = datetime.utcnow()
     print("loaded aiohttp session")
     print("-------------------")
     print(f"{bot.user.name}#{bot.user.discriminator}")
