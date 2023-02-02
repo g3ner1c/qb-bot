@@ -36,6 +36,8 @@ class Tossup(commands.Cog, name="tossup commands"):
         if "*" in tossup["question"]:
             can_power.set()
 
+        tu_finished = asyncio.Event()
+
         print("power possible?", can_power.is_set())
 
         embed = discord.Embed(title="Tossup", description="", color=C_NEUTRAL)
@@ -54,6 +56,8 @@ class Tossup(commands.Cog, name="tossup commands"):
 
             for part in tossup_parts:
 
+                await asyncio.sleep(0.8)
+
                 async with lock:
 
                     embed = discord.Embed(title="Tossup", description=part, color=C_NEUTRAL)
@@ -66,9 +70,9 @@ class Tossup(commands.Cog, name="tossup commands"):
                         can_power.clear()
                         print("power possible?", can_power.is_set())
 
-                await asyncio.sleep(0.8)
+            tu_finished.set()
 
-            await asyncio.sleep(4.2)
+            await asyncio.sleep(5)
 
             return "no answer"
 
@@ -119,6 +123,9 @@ class Tossup(commands.Cog, name="tossup commands"):
                     )
                 )
 
+                if tu_finished.is_set():
+                    reader.cancel()
+
                 try:
                     answer = (
                         await self.bot.wait_for(
@@ -138,7 +145,9 @@ class Tossup(commands.Cog, name="tossup commands"):
                         ).set_footer(text=footer)
                     )
                     await ctx.send(embed=discord.Embed(title=md(a), color=C_NEUTRAL))
-                    return "no answer"
+                    if tu_finished.is_set():
+                        return "no answer"
+                    return "neg"
 
                 while True:
 
@@ -165,7 +174,10 @@ class Tossup(commands.Cog, name="tossup commands"):
 
                         case "reject":
                             print("incorrect")
-                            result = "neg"
+                            if tu_finished.is_set():
+                                result = "dead"
+                            else:
+                                result = "neg"
                             break
 
                         case "prompt":
@@ -240,6 +252,9 @@ class Tossup(commands.Cog, name="tossup commands"):
             case "neg":
                 await ctx.send(embed=discord.Embed(title="neg", color=C_ERROR))
 
+            case "dead":
+                await ctx.send(embed=discord.Embed(title="incorrect, dead tossup", color=C_ERROR))
+
     async def send_tk_end_stats(self, ctx: Context, stats: dict[str, int]) -> None:
 
         embed = discord.Embed(title="Session Stats", color=C_NEUTRAL)
@@ -248,7 +263,9 @@ class Tossup(commands.Cog, name="tossup commands"):
             name="Powers/10s/Negs",
             value=f"{stats['power']}/{stats['correct']}/{stats['neg']}",
         )
-        embed.add_field(name="No Answer", value=stats["no answer"])
+        embed.add_field(
+            name="No Answer/Dead Tossups", value=f"{stats['no answer']}/{stats['dead']}"
+        )
 
         points = stats["power"] * 15 + stats["correct"] * 10 - stats["neg"] * 5
 
@@ -276,7 +293,7 @@ class Tossup(commands.Cog, name="tossup commands"):
             await ctx.send(embed=discord.Embed(title="invalid argument", color=C_ERROR))
             return
 
-        tk_stats = {"power": 0, "correct": 0, "neg": 0, "no answer": 0}
+        tk_stats = {"power": 0, "correct": 0, "neg": 0, "no answer": 0, "dead": 0}
 
         while True:
 
@@ -302,14 +319,20 @@ class Tossup(commands.Cog, name="tossup commands"):
                     tk_stats["neg"] += 1
                     await ctx.send(embed=discord.Embed(title="neg", color=C_ERROR))
 
+                case "dead":
+                    tk_stats["dead"] += 1
+                    await ctx.send(
+                        embed=discord.Embed(title="incorrect, dead tossup", color=C_ERROR)
+                    )
+
             try:
                 await self.bot.wait_for(
                     "message",
                     check=lambda message: message.author == ctx.author
                     and message.channel == ctx.channel
                     and message.content == f"{ctx.prefix}end",
-                    timeout=4,
-                )  # wait 4 seconds before next tossup to give time to read answer
+                    timeout=3.2,
+                )  # wait 4 (3.2 + 0.8 at the beggining) seconds to give time to read answer
                 await self.send_tk_end_stats(ctx, tk_stats)
                 return
 
