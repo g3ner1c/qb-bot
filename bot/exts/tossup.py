@@ -4,7 +4,7 @@ import asyncio
 
 import discord
 from discord.ext import commands
-from discord.ext.commands import Context
+from discord.ext.commands import Bot, Context
 from lib.consts import API_RANDOM_QUESTION, C_ERROR, C_NEUTRAL, C_SUCCESS
 from lib.utils import check_answer, generate_params, tossup_read
 from markdownify import markdownify as md
@@ -14,7 +14,7 @@ lock = asyncio.Lock()
 
 class Tossup(commands.Cog, name="tossup commands"):
     def __init__(self, bot):
-        self.bot = bot
+        self.bot: Bot = bot
 
     async def play_tossup(self, ctx: Context, params: dict) -> str:
 
@@ -68,21 +68,37 @@ class Tossup(commands.Cog, name="tossup commands"):
 
                 await asyncio.sleep(0.8)
 
-        read = asyncio.create_task(edit_tossup())
+            await asyncio.sleep(4.2)
 
-        async def listen_for_answer():  # buzzer task
+            return "no answer"
+
+        reader = asyncio.create_task(edit_tossup())
+
+        async def listen_for_answer(timeout: float | None = None):  # buzzer task
 
             result = ""
 
-            buzz = await self.bot.wait_for(
-                "message",
-                check=lambda message: message.author == ctx.author
-                and message.channel == ctx.channel,
-                timeout=60,  # no idea how i should make the tossup go dead yet
-            )
+            try:
+                buzz = await self.bot.wait_for(
+                    "message",
+                    check=lambda message: message.author == ctx.author
+                    and message.channel == ctx.channel,
+                    timeout=timeout,
+                )
+
+            except asyncio.TimeoutError:
+                print("no answer")
+                reader.cancel()
+                await tu.edit(
+                    embed=discord.Embed(
+                        title="Tossup", description=tossup_parts[-1], color=C_NEUTRAL
+                    ).set_footer(text=footer)
+                )
+                await ctx.send(embed=discord.Embed(title=md(a), color=C_NEUTRAL))
+                return "no answer"
 
             if buzz.content.startswith(f"{ctx.prefix}end"):
-                read.cancel()
+                reader.cancel()
                 await tu.edit(
                     embed=discord.Embed(
                         title="Tossup", description=tossup_parts[-1], color=C_NEUTRAL
@@ -113,9 +129,9 @@ class Tossup(commands.Cog, name="tossup commands"):
                         )
                     ).content
 
-                except asyncio.TimeoutError:
+                except asyncio.TimeoutError:  # no answer on buzz
                     print("no answer")
-                    read.cancel()
+                    reader.cancel()
                     await tu.edit(
                         embed=discord.Embed(
                             title="Tossup", description=tossup_parts[-1], color=C_NEUTRAL
@@ -127,7 +143,7 @@ class Tossup(commands.Cog, name="tossup commands"):
                 while True:
 
                     if answer.startswith(f"{ctx.prefix}end"):
-                        read.cancel()
+                        reader.cancel()
                         await tu.edit(
                             embed=discord.Embed(
                                 title="Tossup", description=tossup_parts[-1], color=C_NEUTRAL
@@ -171,7 +187,8 @@ class Tossup(commands.Cog, name="tossup commands"):
                                 result = "no answer"
                                 break
 
-                read.cancel()
+                print(reader.cancel())
+                print("reader cancelled")
                 await tu.edit(
                     embed=discord.Embed(
                         title="Tossup", description=tossup_parts[-1], color=C_NEUTRAL
@@ -181,7 +198,18 @@ class Tossup(commands.Cog, name="tossup commands"):
                 return result
 
         listener = asyncio.create_task(listen_for_answer())
-        return await listener
+
+        try:
+
+            reader_result = await reader
+            if reader_result == "no answer":
+                listener.cancel()
+                await ctx.send(embed=discord.Embed(title=md(a), color=C_NEUTRAL))
+                return "no answer"
+
+        except asyncio.CancelledError:  # reader cancelled while being awaited
+
+            return await listener
 
     @commands.command(
         name="tossup",
