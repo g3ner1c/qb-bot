@@ -4,13 +4,13 @@ import os
 
 import discord
 from discord.ext import commands
-from discord.ext.commands import Context
+from discord.ext.commands import Bot, Context
 from lib.consts import C_ERROR, C_SUCCESS
 
 
 class Admin(commands.Cog, name="admin and dev testing commands"):
-    def __init__(self, bot):
-        self.bot = bot
+    def __init__(self, bot: Bot):
+        self.bot: Bot = bot
 
     @commands.command(
         name="kill",

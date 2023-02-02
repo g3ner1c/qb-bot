@@ -1,20 +1,18 @@
 """Bonus commands."""
 
-from typing import Union
-
 import discord
 from discord.ext import commands
-from discord.ext.commands import Context
+from discord.ext.commands import Bot, Context
 from lib.consts import API_RANDOM_QUESTION, C_ERROR, C_NEUTRAL, C_SUCCESS
 from lib.utils import check_answer, generate_params
 from markdownify import markdownify as md
 
 
 class Bonus(commands.Cog, name="bonus commands"):
-    def __init__(self, bot):
-        self.bot = bot
+    def __init__(self, bot: Bot):
+        self.bot: Bot = bot
 
-    async def play_bonus(self, ctx: Context, params: dict) -> Union[str, int]:
+    async def play_bonus(self, ctx: Context, params: dict) -> str | int:
 
         async with self.bot.session.post(API_RANDOM_QUESTION, json=params) as r:
             bonus = (await r.json(content_type="text/html"))[0]

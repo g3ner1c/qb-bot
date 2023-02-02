@@ -4,13 +4,13 @@ from datetime import datetime
 
 import discord
 from discord.ext import commands
-from discord.ext.commands import Context
+from discord.ext.commands import Bot, Context
 from lib.consts import C_NEUTRAL, INVITE
 
 
 class General(commands.Cog, name="general commands"):
-    def __init__(self, bot):
-        self.bot = bot
+    def __init__(self, bot: Bot):
+        self.bot: Bot = bot
 
     @commands.command(
         name="ping",

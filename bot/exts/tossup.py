@@ -13,7 +13,7 @@ lock = asyncio.Lock()
 
 
 class Tossup(commands.Cog, name="tossup commands"):
-    def __init__(self, bot):
+    def __init__(self, bot: Bot):
         self.bot: Bot = bot
 
     async def play_tossup(self, ctx: Context, params: dict) -> str:
