@@ -20,7 +20,7 @@ bot = Bot(command_prefix=commands.when_mentioned_or(PREFIX), intents=intents)
 
 
 @bot.event
-async def on_ready() -> None:
+async def on_ready() -> None:  # start processes
 
     bot.session = ClientSession(loop=bot.loop)
     bot.start_time = datetime.utcnow()

@@ -10,7 +10,7 @@ from lib.consts import C_ERROR, C_SUCCESS
 
 class Admin(commands.Cog, name="admin and dev testing commands"):
     def __init__(self, bot: Bot):
-        self.bot: Bot = bot
+        self.bot = bot
 
     @commands.command(
         name="kill",

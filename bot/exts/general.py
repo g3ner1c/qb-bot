@@ -10,7 +10,7 @@ from lib.consts import C_NEUTRAL, INVITE
 
 class General(commands.Cog, name="general commands"):
     def __init__(self, bot: Bot):
-        self.bot: Bot = bot
+        self.bot = bot
 
     @commands.command(
         name="ping",

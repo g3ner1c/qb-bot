@@ -10,9 +10,18 @@ from markdownify import markdownify as md
 
 class Bonus(commands.Cog, name="bonus commands"):
     def __init__(self, bot: Bot):
-        self.bot: Bot = bot
+        self.bot = bot
 
     async def play_bonus(self, ctx: Context, params: dict) -> str | int:
+        """Play a bonus question.
+
+        Args:
+            ctx (Context): Message context
+            params (dict): Parameters for the API request
+
+        Returns:
+            str | int: "ended by user" if the user ended the game, otherwise the number of points
+        """
 
         async with self.bot.session.post(API_RANDOM_QUESTION, json=params) as r:
             bonus = (await r.json(content_type="text/html"))[0]

@@ -5,10 +5,31 @@ from lib.consts import ALIASES, ALL_ALIASES, CATEGORIES, SUBCATEGORIES
 
 
 def parse_int_range(int_ranges: list[str]) -> list[int]:
-    """
-    Parse a list of strings into a list of integers.
+    """Parse a list of stringed difficulty ranges into a list of integers.
 
-    Possible values 0-10
+    Args:
+        int_ranges (list[str]): A list of difficulty ranges.
+
+        If there are multiple ranges, the output will be the union of all ranges.
+
+        Ranges can be of the following forms: `n`, `n-`, `n-m`, `n+`, `<n`, `<=n`, `>n`, `>=n`
+
+        Diffculties can be from 0 to 10:
+
+            `0`: Unrated, usually niche packets written for fun (uncommon)
+            `1`: Middle school
+            `2`: Easy high school
+            `3`: Regular high school
+            `4`: Hard high school
+            `5`: Nationals high school
+            `6`: Easy college (1 dot)
+            `7`: Regular college (2 dot)
+            `8`: Hard college (3 dot)
+            `9`: Nationals college (4 dot)
+            `10`: Open
+
+    Returns:
+        list[int]: A list of integers possible in the given ranges.
 
     Examples:
     ```
@@ -48,8 +69,20 @@ def parse_int_range(int_ranges: list[str]) -> list[int]:
 
 
 def parse_subcats(subcats: list[str]) -> list[str]:
-    """
-    Parse a list of strings of categories and aliases into a list of subcategories.
+    """Parse a list of strings of categories and aliases into a list of subcategories.
+
+    Args:
+        subcats (list[str]): A list of categories and aliases. (single words)
+
+        Order does matter, this function will try to match the longest possible subcategory out of
+        the given words in `subcats`.
+
+        If there are multiple subcategories, the output will be the union of all subcategories.
+
+    Returns:
+
+        list[str]: A list of subcategories.
+
 
     Examples:
 
@@ -84,8 +117,15 @@ def parse_subcats(subcats: list[str]) -> list[str]:
 
 
 def generate_params(question_type: str, argv: list[str]) -> dict:
-    """
-    Generate paramenters for a request to the random question API.
+    """Generate paramenters for a request to the random question API.
+
+    Args:
+        question_type (str): The type of question to request. Can be "tossup" or "bonus".
+        argv (list[str]): A list of arguments to parse, straight from user input.
+
+    Returns:
+        dict: A dictionary of parameters to pass to the API.
+
     """
 
     params = {"questionType": question_type}
@@ -113,52 +153,16 @@ def generate_params(question_type: str, argv: list[str]) -> dict:
     return params
 
 
-def tossup_read(text: str, chunk_size: int, watch_for_power: bool = True) -> list[str]:
-    """
-    Parse a tossup into a list of strings where the tossup is gradually revealed.
-    `watch_for_power` reads carefully around the power marker if it exists.
-
-    Examples:
-
-    ```
-    tossup_read("In quantum mechanics, the square of this quantity is equal to h-bar...", 4) ->
-    [
-        "In quantum mechanics, the",
-        "In quantum mechanics, the square of this quantity",
-        "In quantum mechanics, the square of this quantity is equal to h-bar",
-        "In quantum mechanics, the square of this quantity is equal to h-bar...",
-        ...
-    ]
-    ```
-    """
-
-    text = text.strip().replace("\n", " ").split(" ")
-    chunks = []
-    seen_power = False
-
-    for i in range(0, len(text), chunk_size):
-
-        next_read = text[: i + chunk_size]
-
-        if watch_for_power and not seen_power and "(*)" in next_read:
-
-            if not next_read[-1].endswith("(*)"):
-
-                power_chunk = next_read[: next_read.index("(*)") + 1]
-                chunks.append(" ".join(power_chunk))
-
-            seen_power = True
-
-        chunks.append(" ".join(next_read))
-
-    return chunks
-
-
 async def check_answer(answerline: str, answer: str, client: aiohttp.ClientSession) -> str:
-    """
-    Check if an answer is correct using the QB Reader API.
+    """Check if an answer is correct using the QB Reader API.
 
-    Returns "accept", "reject", and "prompt"
+    Args:
+        answerline (str): The answerline of the question.
+        answer (str): The answer to check.
+        client (aiohttp.ClientSession): `aiohttp` client session.
+
+    Returns:
+        str: The result of the check. Can be "accept", "reject", or "prompt"
     """
 
     async with client.get(

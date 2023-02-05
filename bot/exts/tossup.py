@@ -6,7 +6,7 @@ import discord
 from discord.ext import commands
 from discord.ext.commands import Bot, Context
 from lib.consts import API_RANDOM_QUESTION, C_ERROR, C_NEUTRAL, C_SUCCESS
-from lib.utils import check_answer, generate_params, tossup_read
+from lib.utils import check_answer, generate_params
 from markdownify import markdownify as md
 
 lock = asyncio.Lock()
@@ -14,14 +14,72 @@ lock = asyncio.Lock()
 
 class Tossup(commands.Cog, name="tossup commands"):
     def __init__(self, bot: Bot):
-        self.bot: Bot = bot
+        self.bot = bot
+
+    def generate_lines(self, text: str, chunk_size: int, watch_power: bool = True) -> list[str]:
+        """Parse a tossup into a list of strings where the tossup is gradually revealed.
+
+        Args:
+            text (str): The text to parse
+            chunk_size (int): The number of words to include in each chunk
+            watch_power (bool, optional): Read carefully around the power mark. Defaults to True.
+
+        Examples:
+
+        ```
+        generate_lines("In quantum mechanics, the square of this quantity...", 4) ->
+        [
+            "In quantum mechanics, the",
+            "In quantum mechanics, the square of this quantity",
+            "In quantum mechanics, the square of this quantity is equal to h-bar",
+            "In quantum mechanics, the square of this quantity is equal to h-bar...",
+            ...
+        ]
+        ```
+        """
+
+        text = text.strip().replace("\n", " ").split(" ")
+        chunks = []
+        seen_power = False
+
+        for i in range(0, len(text), chunk_size):
+
+            next_read = text[: i + chunk_size]
+
+            if watch_power and not seen_power and "(*)" in next_read:
+
+                if not next_read[-1].endswith("(*)"):
+
+                    power_chunk = next_read[: next_read.index("(*)") + 1]
+                    chunks.append(" ".join(power_chunk))
+
+                seen_power = True
+
+            chunks.append(" ".join(next_read))
+
+        return chunks
 
     async def play_tossup(self, ctx: Context, params: dict) -> str:
+        """Play a tossup question.
+
+        Args:
+            ctx (Context): Message context
+            params (dict): Parameters for the API request
+
+        Returns:
+            str:
+                `"ended by user": user ended the game
+                `"no answer"`: user did not attempt to answer
+                `"power"`: user answered correctly before the power mark
+                `"correct"`: user answered correctly after the power mark
+                `"neg"`: user answered incorrectly
+                `"dead"`: user answered incorrectly after the tossup is finished reading
+        """
 
         async with self.bot.session.post(API_RANDOM_QUESTION, json=params) as r:
             tossup = (await r.json(content_type="text/html"))[0]
 
-        tossup_parts = tossup_read(tossup["question"], 5)
+        tossup_parts = self.generate_lines(tossup["question"], 5)
 
         footer = [
             tossup["setName"],
