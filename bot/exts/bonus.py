@@ -115,8 +115,8 @@ class Bonus(commands.Cog, name="bonus commands"):
 
         try:
             params = generate_params("bonus", argv)
-        except ValueError:
-            await ctx.send(embed=discord.Embed(title="invalid argument", color=C_ERROR))
+        except ValueError as e:
+            await ctx.send(embed=discord.Embed(title=str(e), color=C_ERROR))
             return
 
         points = await self.play_bonus(ctx, params)
@@ -135,8 +135,8 @@ class Bonus(commands.Cog, name="bonus commands"):
 
         try:
             params = generate_params("bonus", argv)
-        except ValueError:
-            await ctx.send(embed=discord.Embed(title="invalid argument", color=C_ERROR))
+        except ValueError as e:
+            await ctx.send(embed=discord.Embed(title=str(e), color=C_ERROR))
             return
 
         total_points = 0

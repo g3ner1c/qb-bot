@@ -291,8 +291,8 @@ class Tossup(commands.Cog, name="tossup commands"):
 
         try:
             params = generate_params("tossup", argv)
-        except ValueError:
-            await ctx.send(embed=discord.Embed(title="invalid argument", color=C_ERROR))
+        except ValueError as e:
+            await ctx.send(embed=discord.Embed(title=str(e), color=C_ERROR))
             return
 
         match await self.play_tossup(ctx, params):
@@ -344,8 +344,8 @@ class Tossup(commands.Cog, name="tossup commands"):
 
         try:
             params = generate_params("tossup", argv)
-        except ValueError:
-            await ctx.send(embed=discord.Embed(title="invalid argument", color=C_ERROR))
+        except ValueError as e:
+            await ctx.send(embed=discord.Embed(title=str(e), color=C_ERROR))
             return
 
         tk_stats = {"power": 0, "correct": 0, "neg": 0, "dead": 0}

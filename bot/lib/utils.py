@@ -65,7 +65,11 @@ def parse_int_range(int_ranges: list[str]) -> list[int]:
         else:
             return [int(s)]
 
-    return sorted(set(sum(map(parse, int_ranges), [])))  # flatten and remove duplicates
+    difficulties = sorted(set(sum(map(parse, int_ranges), [])))  # flatten and remove duplicates
+    if any(d < 0 or d > 10 for d in difficulties):
+        raise ValueError("Invalid difficulty, only 0-10 are allowed")
+
+    return difficulties
 
 
 def parse_subcats(subcats: list[str]) -> list[str]:
@@ -93,7 +97,7 @@ def parse_subcats(subcats: list[str]) -> list[str]:
     ```
     """
 
-    for index, cat in enumerate(subcats):
+    for index, cat in enumerate(subcats):  # join together strings that are aliases
         try:
             while (
                 expanded_cat := " ".join([cat] + subcats[index + 1 : index + 2])  # noqa: E203
@@ -104,14 +108,14 @@ def parse_subcats(subcats: list[str]) -> list[str]:
             pass
         subcats[index] = cat
 
-    def parse(s: str) -> list[str]:
+    def parse(s: str) -> list[str]:  # replace aliases with actual names
         for cat, aliases in ALIASES.items():
             if s == cat.lower() or s in aliases:
                 if cat in CATEGORIES:
                     return SUBCATEGORIES[cat]
                 else:
                     return [cat]
-        return [s]
+        raise ValueError(f"Invalid category: {s}")
 
     return sorted(set(sum(map(parse, subcats), [])))
 
@@ -144,11 +148,16 @@ def generate_params(question_type: str, argv: list[str]) -> dict:
         else:
             raise ValueError("Invalid argument")
 
-    if diffs:
-        params["difficulties"] = parse_int_range(diffs)
+    try:
 
-    if cats:
-        params["subcategories"] = parse_subcats(cats)
+        if diffs:
+            params["difficulties"] = parse_int_range(diffs)
+
+        if cats:
+            params["subcategories"] = parse_subcats(cats)
+
+    except ValueError as e:
+        raise ValueError(e)
 
     return params
 
