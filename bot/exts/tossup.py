@@ -69,10 +69,9 @@ class Tossup(commands.Cog, name="tossup commands"):
         Returns:
             str:
                 `"ended by user": user ended the game
-                `"no answer"`: user did not attempt to answer
                 `"power"`: user answered correctly before the power mark
                 `"correct"`: user answered correctly after the power mark
-                `"neg"`: user answered incorrectly
+                `"neg"`: user answered incorrectly before the tossup is finished reading
                 `"dead"`: user answered incorrectly after the tossup is finished reading
         """
 
@@ -132,7 +131,7 @@ class Tossup(commands.Cog, name="tossup commands"):
 
             await asyncio.sleep(5)
 
-            return "no answer"
+            return "dead"
 
         reader = asyncio.create_task(edit_tossup())
 
@@ -157,7 +156,7 @@ class Tossup(commands.Cog, name="tossup commands"):
                     ).set_footer(text=footer)
                 )
                 await ctx.send(embed=discord.Embed(title=md(a), color=C_NEUTRAL))
-                return "no answer"
+                return "dead"
 
             if buzz.content.startswith(f"{ctx.prefix}end"):
                 reader.cancel()
@@ -204,7 +203,7 @@ class Tossup(commands.Cog, name="tossup commands"):
                     )
                     await ctx.send(embed=discord.Embed(title=md(a), color=C_NEUTRAL))
                     if tu_finished.is_set():
-                        return "no answer"
+                        return "dead"
                     return "neg"
 
                 while True:
@@ -254,7 +253,10 @@ class Tossup(commands.Cog, name="tossup commands"):
 
                             except asyncio.TimeoutError:
                                 print("no answer")
-                                result = "no answer"
+                                if tu_finished.is_set():
+                                    result = "dead"
+                                else:
+                                    result = "neg"
                                 break
 
                 print(reader.cancel())
@@ -272,10 +274,10 @@ class Tossup(commands.Cog, name="tossup commands"):
         try:
 
             reader_result = await reader
-            if reader_result == "no answer":
+            if reader_result == "dead":
                 listener.cancel()
                 await ctx.send(embed=discord.Embed(title=md(a), color=C_NEUTRAL))
-                return "no answer"
+                return "dead"
 
         except asyncio.CancelledError:  # reader cancelled while being awaited
 
@@ -298,9 +300,6 @@ class Tossup(commands.Cog, name="tossup commands"):
             case "ended by user":
                 await ctx.send(embed=discord.Embed(title="ending tossup", color=C_ERROR))
 
-            case "no answer":
-                await ctx.send(embed=discord.Embed(title="no answer", color=C_ERROR))
-
             case "power":
                 await ctx.send(embed=discord.Embed(title="power", color=C_SUCCESS))
 
@@ -321,9 +320,7 @@ class Tossup(commands.Cog, name="tossup commands"):
             name="Powers/10s/Negs",
             value=f"{stats['power']}/{stats['correct']}/{stats['neg']}",
         )
-        embed.add_field(
-            name="No Answer/Dead Tossups", value=f"{stats['no answer']}/{stats['dead']}"
-        )
+        embed.add_field(name="Dead Tossups", value=str(stats["dead"]))
 
         points = stats["power"] * 15 + stats["correct"] * 10 - stats["neg"] * 5
 
@@ -351,7 +348,7 @@ class Tossup(commands.Cog, name="tossup commands"):
             await ctx.send(embed=discord.Embed(title="invalid argument", color=C_ERROR))
             return
 
-        tk_stats = {"power": 0, "correct": 0, "neg": 0, "no answer": 0, "dead": 0}
+        tk_stats = {"power": 0, "correct": 0, "neg": 0, "dead": 0}
 
         while True:
 
@@ -360,10 +357,6 @@ class Tossup(commands.Cog, name="tossup commands"):
                 case "ended by user":
                     await self.send_tk_end_stats(ctx, tk_stats)
                     return
-
-                case "no answer":
-                    tk_stats["no answer"] += 1
-                    await ctx.send(embed=discord.Embed(title="no answer", color=C_ERROR))
 
                 case "power":
                     tk_stats["power"] += 1
