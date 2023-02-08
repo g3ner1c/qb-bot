@@ -59,7 +59,7 @@ class Tossup(commands.Cog, name="tossup commands"):
 
         return chunks
 
-    async def play_tossup(self, ctx: Context, params: dict) -> str:
+    async def play_tossup(self, ctx: Context, params: dict) -> tuple[str, str]:
         """Play a tossup question.
 
         Args:
@@ -67,8 +67,11 @@ class Tossup(commands.Cog, name="tossup commands"):
             params (dict): Parameters for the API request
 
         Returns:
-            str:
-                `"ended by user": user ended the game
+            tuple[str, str]: The formatted answer and the result of the tossup
+
+            Results can be one of the following:
+
+                `"ended by user"`: user ended the game
                 `"power"`: user answered correctly before the power mark
                 `"correct"`: user answered correctly after the power mark
                 `"neg"`: user answered incorrectly before the tossup is finished reading
@@ -155,7 +158,6 @@ class Tossup(commands.Cog, name="tossup commands"):
                         title="Tossup", description=tossup_parts[-1], color=C_NEUTRAL
                     ).set_footer(text=footer)
                 )
-                await ctx.send(embed=discord.Embed(title=md(a), color=C_NEUTRAL))
                 return "dead"
 
             if buzz.content.startswith(f"{ctx.prefix}end"):
@@ -165,7 +167,6 @@ class Tossup(commands.Cog, name="tossup commands"):
                         title="Tossup", description=tossup_parts[-1], color=C_NEUTRAL
                     ).set_footer(text=footer)
                 )
-                await ctx.send(embed=discord.Embed(title=md(a), color=C_NEUTRAL))
                 return "ended by user"
 
             async with lock:
@@ -201,7 +202,6 @@ class Tossup(commands.Cog, name="tossup commands"):
                             title="Tossup", description=tossup_parts[-1], color=C_NEUTRAL
                         ).set_footer(text=footer)
                     )
-                    await ctx.send(embed=discord.Embed(title=md(a), color=C_NEUTRAL))
                     if tu_finished.is_set():
                         return "dead"
                     return "neg"
@@ -215,7 +215,6 @@ class Tossup(commands.Cog, name="tossup commands"):
                                 title="Tossup", description=tossup_parts[-1], color=C_NEUTRAL
                             ).set_footer(text=footer)
                         )
-                        await ctx.send(embed=discord.Embed(title=md(a), color=C_NEUTRAL))
                         return "ended by user"
 
                     match await check_answer(a, answer, self.bot.session):
@@ -266,7 +265,6 @@ class Tossup(commands.Cog, name="tossup commands"):
                         title="Tossup", description=tossup_parts[-1], color=C_NEUTRAL
                     ).set_footer(text=footer)
                 )
-                await ctx.send(embed=discord.Embed(title=md(a), color=C_NEUTRAL))
                 return result
 
         listener = asyncio.create_task(listen_for_answer())
@@ -276,12 +274,11 @@ class Tossup(commands.Cog, name="tossup commands"):
             reader_result = await reader
             if reader_result == "dead":
                 listener.cancel()
-                await ctx.send(embed=discord.Embed(title=md(a), color=C_NEUTRAL))
-                return "dead"
+                return a, "dead"
 
         except asyncio.CancelledError:  # reader cancelled while being awaited
 
-            return await listener
+            return a, await listener
 
     @commands.command(
         name="tossup",
@@ -297,20 +294,30 @@ class Tossup(commands.Cog, name="tossup commands"):
 
         match await self.play_tossup(ctx, params):
 
-            case "ended by user":
-                await ctx.send(embed=discord.Embed(title="ending tossup", color=C_ERROR))
+            case (answer, "ended by user"):
+                await ctx.send(embed=discord.Embed(title="Ending Tossup", color=C_NEUTRAL))
 
-            case "power":
-                await ctx.send(embed=discord.Embed(title="power", color=C_SUCCESS))
+            case (answer, "power"):
+                await ctx.send(
+                    embed=discord.Embed(title="Power", description=md(answer), color=C_SUCCESS)
+                )
 
-            case "correct":
-                await ctx.send(embed=discord.Embed(title="correct", color=C_SUCCESS))
+            case (answer, "correct"):
+                await ctx.send(
+                    embed=discord.Embed(title="Correct", description=md(answer), color=C_SUCCESS)
+                )
 
-            case "neg":
-                await ctx.send(embed=discord.Embed(title="neg", color=C_ERROR))
+            case (answer, "neg"):
+                await ctx.send(
+                    embed=discord.Embed(title="Neg", description=md(answer), color=C_ERROR)
+                )
 
-            case "dead":
-                await ctx.send(embed=discord.Embed(title="incorrect, dead tossup", color=C_ERROR))
+            case (answer, "dead"):
+                await ctx.send(
+                    embed=discord.Embed(
+                        title="Incorrect, DT", description=md(answer), color=C_ERROR
+                    )
+                )
 
     async def send_tk_end_stats(self, ctx: Context, stats: dict[str, int]) -> None:
 
@@ -354,26 +361,36 @@ class Tossup(commands.Cog, name="tossup commands"):
 
             match await self.play_tossup(ctx, params):
 
-                case "ended by user":
+                case (answer, "ended by user"):
                     await self.send_tk_end_stats(ctx, tk_stats)
                     return
 
-                case "power":
+                case (answer, "power"):
                     tk_stats["power"] += 1
-                    await ctx.send(embed=discord.Embed(title="power", color=C_SUCCESS))
+                    await ctx.send(
+                        embed=discord.Embed(title="Power", description=md(answer), color=C_SUCCESS)
+                    )
 
-                case "correct":
+                case (answer, "correct"):
                     tk_stats["correct"] += 1
-                    await ctx.send(embed=discord.Embed(title="correct", color=C_SUCCESS))
+                    await ctx.send(
+                        embed=discord.Embed(
+                            title="Correct", description=md(answer), color=C_SUCCESS
+                        )
+                    )
 
-                case "neg":
+                case (answer, "neg"):
                     tk_stats["neg"] += 1
-                    await ctx.send(embed=discord.Embed(title="neg", color=C_ERROR))
+                    await ctx.send(
+                        embed=discord.Embed(title="Neg", description=md(answer), color=C_ERROR)
+                    )
 
-                case "dead":
+                case (answer, "dead"):
                     tk_stats["dead"] += 1
                     await ctx.send(
-                        embed=discord.Embed(title="incorrect, dead tossup", color=C_ERROR)
+                        embed=discord.Embed(
+                            title="Incorrect, DT", description=md(answer), color=C_ERROR
+                        )
                     )
 
             try:
