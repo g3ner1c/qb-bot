@@ -110,7 +110,10 @@ def parse_subcats(subcats: list[str]) -> list[str]:
 
     def parse(s: str) -> list[str]:  # replace aliases with actual names
         for cat, aliases in ALIASES.items():
-            if s == cat.lower() or s in aliases:
+            if s.lower().replace(" ", "") == cat.lower().replace(" ", "") or s.lower().replace(
+                " ", ""
+            ) in [alias.lower().replace(" ", "") for alias in aliases]:
+                # maximum matching, ignores spaces and casing
                 if cat in CATEGORIES:
                     return SUBCATEGORIES[cat]
                 else:
