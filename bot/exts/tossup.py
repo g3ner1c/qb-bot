@@ -319,7 +319,7 @@ class Tossup(commands.Cog, name="tossup commands"):
                     )
                 )
 
-    async def send_tk_end_stats(self, ctx: Context, stats: dict[str, int]) -> None:
+    async def send_tk_end_stats(self, ctx: Context, stats: dict[str, int], argv) -> None:
 
         embed = discord.Embed(title="Session Stats", color=C_NEUTRAL)
         embed.add_field(name="Tossups", value=sum(stats.values()))
@@ -340,6 +340,8 @@ class Tossup(commands.Cog, name="tossup commands"):
                 name="PP20TUH",
                 value="wow you really just started a session and ended it immediately",
             )
+
+        embed.add_field(name="Filters", value=f"`{' '.join(argv)}`", inline=False)
 
         await ctx.send(embed=embed)
 
@@ -362,7 +364,7 @@ class Tossup(commands.Cog, name="tossup commands"):
             match await self.play_tossup(ctx, params):
 
                 case (answer, "ended by user"):
-                    await self.send_tk_end_stats(ctx, tk_stats)
+                    await self.send_tk_end_stats(ctx, tk_stats, argv)
                     return
 
                 case (answer, "power"):
@@ -401,7 +403,7 @@ class Tossup(commands.Cog, name="tossup commands"):
                     and message.content == f"{ctx.prefix}end",
                     timeout=3.2,
                 )  # wait 4 (3.2 + 0.8 at the beggining) seconds to give time to read answer
-                await self.send_tk_end_stats(ctx, tk_stats)
+                await self.send_tk_end_stats(ctx, tk_stats, argv)
                 return
 
             except asyncio.TimeoutError:

@@ -159,6 +159,8 @@ class Bonus(commands.Cog, name="bonus commands"):
                         name="PPB", value="why would you even start a session just to end it?"
                     )
 
+                stats.add_field(name="Filters", value=f"`{' '.join(argv)}`")
+
                 await ctx.send(embed=stats)
                 return
 
