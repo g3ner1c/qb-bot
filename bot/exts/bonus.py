@@ -3,7 +3,7 @@
 import discord
 from discord.ext import commands
 from discord.ext.commands import Bot, Context
-from lib.consts import API_RANDOM_QUESTION, C_ERROR, C_NEUTRAL, C_SUCCESS
+from lib.consts import C_ERROR, C_NEUTRAL, C_SUCCESS, QBREADER_API
 from lib.utils import check_answer, generate_params
 from markdownify import markdownify as md
 
@@ -23,7 +23,7 @@ class Bonus(commands.Cog, name="bonus commands"):
             str | int: "ended by user" if the user ended the game, otherwise the number of points
         """
 
-        async with self.bot.session.post(API_RANDOM_QUESTION, json=params) as r:
+        async with self.bot.session.post(f"{QBREADER_API}/random-question", json=params) as r:
             bonus = (await r.json(content_type="text/html"))[0]
 
         points = 0
@@ -156,7 +156,8 @@ class Bonus(commands.Cog, name="bonus commands"):
                     stats.add_field(name="PPB", value=round(total_points / total_bonuses, 2))
                 except ZeroDivisionError:
                     stats.add_field(
-                        name="PPB", value="why would you even start a session just to end it?"
+                        name="PPB",
+                        value="why would you even start a session just to end it?",
                     )
 
                 stats.add_field(name="Filters", value=f"`{' '.join(argv)}`")

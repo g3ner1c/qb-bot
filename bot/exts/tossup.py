@@ -5,7 +5,7 @@ import asyncio
 import discord
 from discord.ext import commands
 from discord.ext.commands import Bot, Context
-from lib.consts import API_RANDOM_QUESTION, C_ERROR, C_NEUTRAL, C_SUCCESS
+from lib.consts import C_ERROR, C_NEUTRAL, C_SUCCESS, QBREADER_API
 from lib.utils import check_answer, generate_params
 from markdownify import markdownify as md
 
@@ -78,7 +78,7 @@ class Tossup(commands.Cog, name="tossup commands"):
                 `"dead"`: user answered incorrectly after the tossup is finished reading
         """
 
-        async with self.bot.session.post(API_RANDOM_QUESTION, json=params) as r:
+        async with self.bot.session.post(f"{QBREADER_API}/random-question", json=params) as r:
             tossup = (await r.json(content_type="text/html"))[0]
 
         tossup_parts = self.generate_lines(tossup["question"], 5)
@@ -199,7 +199,9 @@ class Tossup(commands.Cog, name="tossup commands"):
                     reader.cancel()
                     await tu.edit(
                         embed=discord.Embed(
-                            title="Tossup", description=tossup_parts[-1], color=C_NEUTRAL
+                            title="Tossup",
+                            description=tossup_parts[-1],
+                            color=C_NEUTRAL,
                         ).set_footer(text=footer)
                     )
                     if tu_finished.is_set():
@@ -212,7 +214,9 @@ class Tossup(commands.Cog, name="tossup commands"):
                         reader.cancel()
                         await tu.edit(
                             embed=discord.Embed(
-                                title="Tossup", description=tossup_parts[-1], color=C_NEUTRAL
+                                title="Tossup",
+                                description=tossup_parts[-1],
+                                color=C_NEUTRAL,
                             ).set_footer(text=footer)
                         )
                         return "ended by user"

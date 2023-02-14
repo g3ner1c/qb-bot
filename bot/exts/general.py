@@ -53,10 +53,14 @@ class General(commands.Cog, name="general commands"):
     async def uptime(self, ctx: Context) -> None:
         embed = discord.Embed(title="Status", color=C_NEUTRAL)
         embed.add_field(
-            name="Uptime", value=f"`{str(datetime.utcnow() - self.bot.start_time)}`", inline=False
+            name="Uptime",
+            value=f"`{str(datetime.utcnow() - self.bot.start_time)}`",
+            inline=False,
         )
         embed.add_field(
-            name="Last restart (UTC)", value=f"`{str(self.bot.start_time)}`", inline=False
+            name="Last restart (UTC)",
+            value=f"`{str(self.bot.start_time)}`",
+            inline=False,
         )
         await ctx.send(embed=embed)
 
@@ -67,7 +71,8 @@ class General(commands.Cog, name="general commands"):
     async def github(self, ctx: Context) -> None:
         await ctx.send(
             embed=discord.Embed(
-                title="You can find my source code here!", url="https://github.com/g3ner1c/qb-bot"
+                title="You can find my source code here!",
+                url="https://github.com/g3ner1c/qb-bot",
             )
         )
 

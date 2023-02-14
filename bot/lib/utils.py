@@ -1,7 +1,7 @@
 """Helper functions."""
 
 import aiohttp
-from lib.consts import ALIASES, ALL_ALIASES, CATEGORIES, SUBCATEGORIES
+from lib.consts import ALIASES, ALL_ALIASES, CATEGORIES, QBREADER_API, SUBCATEGORIES
 
 
 def parse_int_range(int_ranges: list[str]) -> list[int]:
@@ -165,7 +165,9 @@ def generate_params(question_type: str, argv: list[str]) -> dict:
     return params
 
 
-async def check_answer(answerline: str, answer: str, client: aiohttp.ClientSession) -> str:
+async def check_answer(
+    answerline: str, answer: str, client: aiohttp.ClientSession
+) -> tuple[str, str | None]:
     """Check if an answer is correct using the QB Reader API.
 
     Args:
@@ -174,11 +176,11 @@ async def check_answer(answerline: str, answer: str, client: aiohttp.ClientSessi
         client (aiohttp.ClientSession): `aiohttp` client session.
 
     Returns:
-        str: The result of the check. Can be "accept", "reject", or "prompt"
+        tuple[str, str | None]: A tuple of the directive and prompted responses, if any.
     """
 
     async with client.get(
-        "https://www.qbreader.org/api/check-answer",
+        f"{QBREADER_API}/check-answer",
         params={"answerline": answerline, "givenAnswer": answer},
     ) as r:
-        return await r.json(content_type="text/html")
+        return tuple(await r.json(content_type="text/html"))
