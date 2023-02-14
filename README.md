@@ -52,7 +52,7 @@ You can set environment variables in a `.env` file in the root directory or in y
 Now that you have everything set up, you can simply run the bot with:
 
 ```sh
-poetry run python3 bot.py
+poetry run python3 bot/
 ```
 
 Congratulations! :D
