@@ -223,7 +223,7 @@ class Tossup(commands.Cog, name="tossup commands"):
 
                     match await check_answer(a, answer, self.bot.session):
 
-                        case "accept":
+                        case ("accept", _):
                             print("correct")
                             print("power possible?", can_power.is_set())
                             if can_power.is_set():
@@ -232,7 +232,7 @@ class Tossup(commands.Cog, name="tossup commands"):
                                 result = "correct"
                             break
 
-                        case "reject":
+                        case ("reject", _):
                             print("incorrect")
                             if tu_finished.is_set():
                                 result = "dead"
@@ -240,8 +240,14 @@ class Tossup(commands.Cog, name="tossup commands"):
                                 result = "neg"
                             break
 
-                        case "prompt":
-                            await ctx.send(embed=discord.Embed(title="prompt", color=C_NEUTRAL))
+                        case ("prompt", response):
+                            await ctx.send(
+                                embed=discord.Embed(
+                                    title="prompt",
+                                    description=md(response) if response else response,
+                                    color=C_NEUTRAL,
+                                )
+                            )
                             print("prompt")
 
                             try:
@@ -261,6 +267,16 @@ class Tossup(commands.Cog, name="tossup commands"):
                                 else:
                                     result = "neg"
                                 break
+
+                        case _:
+                            await ctx.send(
+                                embed=discord.Embed(
+                                    title="Error",
+                                    description="Something went wrong",
+                                    color=C_ERROR,
+                                )
+                            )
+                            return "ended by user"
 
                 print(reader.cancel())
                 print("reader cancelled")

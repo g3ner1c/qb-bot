@@ -76,7 +76,7 @@ class Bonus(commands.Cog, name="bonus commands"):
 
                 match await check_answer(a, answer, self.bot.session):
 
-                    case "accept":  # correct
+                    case ("accept", _):  # correct
                         await ctx.send(
                             embed=discord.Embed(
                                 title="Correct", description=md(a), color=C_SUCCESS
@@ -85,7 +85,7 @@ class Bonus(commands.Cog, name="bonus commands"):
                         points += 10
                         break
 
-                    case "reject":  # incorrect
+                    case ("reject", _):  # incorrect
                         await ctx.send(
                             embed=discord.Embed(
                                 title="Incorrect", description=md(a), color=C_ERROR
@@ -93,8 +93,14 @@ class Bonus(commands.Cog, name="bonus commands"):
                         )
                         break
 
-                    case "prompt":  # prompt
-                        await ctx.send(embed=discord.Embed(title="Prompt", color=C_NEUTRAL))
+                    case ("prompt", response):  # prompt
+                        await ctx.send(
+                            embed=discord.Embed(
+                                title="Prompt",
+                                description=md(response) if response else response,
+                                color=C_NEUTRAL,
+                            )
+                        )
                         answer = (
                             await self.bot.wait_for(
                                 "message",
@@ -104,6 +110,15 @@ class Bonus(commands.Cog, name="bonus commands"):
                                 timeout=60,
                             )
                         ).content
+
+                    case _:
+                        await ctx.send(
+                            embed=discord.Embed(
+                                title="Error", description="Something went wrong", color=C_ERROR
+                            )
+                        )
+                        return "ended by user"
+                        # i meannnn i could make an error type but this is fine
 
         return points
 
