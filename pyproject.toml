@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "qb-bot"
-version = "0.0.1"
+version = "1.0.0-rc.0"
 description = "quizbowl discord bot"
 authors = ["Sky \"g3ner1c\" Hong <g3ner1c-sky@pm.me>"]
 license = "AGPL-3.0-or-later"
