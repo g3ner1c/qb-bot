@@ -19,7 +19,8 @@ aiodns = "^3.0"
 [tool.poetry.dev-dependencies]
 flake8 = "^6.0"
 isort = "^5.10"
-black = "^22.10"
+black = "^23.1"
+pydocstyle = "^6.3"
 pre-commit = "^2.20"
 python-dotenv = "^0.21"
 
@@ -33,3 +34,6 @@ line_length = 99
 [tool.flake8]
 max_line_length = 99
 exclude = ".vscode,.git,__pycache__,.venv"
+
+[tool.pydocstyle]
+convention = "numpy"

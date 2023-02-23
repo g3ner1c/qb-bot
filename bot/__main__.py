@@ -1,3 +1,5 @@
+"""Bot entry point."""
+
 import asyncio
 import os
 import platform
@@ -20,7 +22,8 @@ bot = Bot(command_prefix=commands.when_mentioned_or(PREFIX), intents=intents)
 
 
 @bot.event
-async def on_ready() -> None:  # start processes
+async def on_ready() -> None:  # noqa: D103
+    # start processes
 
     bot.session = ClientSession(loop=bot.loop)
     bot.start_time = datetime.utcnow()
@@ -35,21 +38,20 @@ async def on_ready() -> None:  # start processes
 
 
 @tasks.loop(minutes=1.0)
-async def status_task() -> None:
+async def status_task() -> None:  # noqa: D103
     statuses = ["beep boop im a bot"]
     await bot.change_presence(activity=discord.Game(random.choice(statuses)))
 
 
 @bot.event
-async def on_message(message: discord.Message) -> None:
+async def on_message(message: discord.Message) -> None:  # noqa: D103
     if message.author == bot.user or message.author.bot:
         return
     await bot.process_commands(message)
 
 
 @bot.event
-async def on_command_error(context: Context, error) -> None:
-
+async def on_command_error(context: Context, error) -> None:  # noqa: D103
     if isinstance(error, commands.MissingRequiredArgument):
         embed = discord.Embed(
             title="missing required argument",
@@ -67,7 +69,6 @@ async def on_command_error(context: Context, error) -> None:
         await context.send(embed=embed)
 
     elif isinstance(error, commands.NotOwner):
-
         embed = discord.Embed(title="not owner", description="no", color=C_ERROR)
         await context.send(embed=embed)
 
@@ -88,8 +89,7 @@ async def on_command_error(context: Context, error) -> None:
     raise error
 
 
-async def load_cogs() -> None:
-
+async def load_cogs() -> None:  # noqa: D103
     for file in os.listdir("./bot/exts"):
         if file.endswith(".py"):
             ext = file[:-3]

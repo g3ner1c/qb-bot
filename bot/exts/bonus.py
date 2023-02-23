@@ -9,20 +9,26 @@ from markdownify import markdownify as md
 
 
 class Bonus(commands.Cog, name="bonus commands"):
+    """Command class for bonus commands."""
+
     def __init__(self, bot: Bot):
         self.bot = bot
 
     async def play_bonus(self, ctx: Context, params: dict) -> str | int:
         """Play a bonus question.
 
-        Args:
-            ctx (Context): Message context
-            params (dict): Parameters for the API request
+        Parameters
+        ----------
+            ctx : `discord.ext.commands.Context`
+                Message context.
+            params : `dict`
+                Parameters for the API request.
 
-        Returns:
-            str | int: "ended by user" if the user ended the game, otherwise the number of points
+        Returns
+        -------
+            `str | int`
+                `"ended by user"` if the user ended the game, otherwise the number of points.
         """
-
         async with self.bot.session.post(f"{QBREADER_API}/random-question", json=params) as r:
             bonus = (await r.json(content_type="text/html"))[0]
 
@@ -54,7 +60,6 @@ class Bonus(commands.Cog, name="bonus commands"):
             enum = enumerate(zip(bonus["parts"], bonus["answers"]), 1)
 
         for i, (q, a) in enum:
-
             part = discord.Embed(title=str(i), description=q, color=C_NEUTRAL)
 
             await ctx.send(embed=part)
@@ -70,12 +75,10 @@ class Bonus(commands.Cog, name="bonus commands"):
             ).content
 
             while True:
-
                 if answer.startswith(f"{ctx.prefix}end"):
                     return "ended by user"
 
                 match await check_answer(a, answer, self.bot.session):
-
                     case ("accept", _):  # correct
                         await ctx.send(
                             embed=discord.Embed(
@@ -127,7 +130,7 @@ class Bonus(commands.Cog, name="bonus commands"):
         description="returns a random bonus",
     )
     async def bonus(self, ctx: Context, *argv) -> None:
-
+        """Play a random bonus."""
         try:
             params = generate_params("bonus", argv)
         except ValueError as e:
@@ -147,7 +150,7 @@ class Bonus(commands.Cog, name="bonus commands"):
         description="start a pk session",
     )
     async def pk(self, ctx: Context, *argv) -> None:
-
+        """Start a pk session."""
         try:
             params = generate_params("bonus", argv)
         except ValueError as e:
@@ -158,11 +161,9 @@ class Bonus(commands.Cog, name="bonus commands"):
         total_bonuses = 0
 
         while True:
-
             points = await self.play_bonus(ctx, params)
 
             if points == "ended by user":
-
                 stats = discord.Embed(title="Session Stats", color=C_NEUTRAL)
                 stats.add_field(name="Bonuses", value=total_bonuses)
                 stats.add_field(name="Points", value=total_points)
@@ -186,5 +187,5 @@ class Bonus(commands.Cog, name="bonus commands"):
             await ctx.send(embed=discord.Embed(title=f"{points}/30", color=C_NEUTRAL))
 
 
-async def setup(bot):
+async def setup(bot):  # noqa D103
     await bot.add_cog(Bonus(bot))

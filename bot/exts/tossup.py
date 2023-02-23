@@ -13,21 +13,31 @@ lock = asyncio.Lock()
 
 
 class Tossup(commands.Cog, name="tossup commands"):
+    """Command class for tossup commands."""
+
     def __init__(self, bot: Bot):
         self.bot = bot
 
     def generate_lines(self, text: str, chunk_size: int, watch_power: bool = True) -> list[str]:
         """Parse a tossup into a list of strings where the tossup is gradually revealed.
 
-        Args:
-            text (str): The text to parse
-            chunk_size (int): The number of words to include in each chunk
-            watch_power (bool, optional): Read carefully around the power mark. Defaults to True.
+        Parameters
+        ----------
+            text : `str`
+                The text to parse.
+            chunk_size : `int`
+                The number of words to include in each chunk.
+            watch_power : `bool`, default = `True`
+                Read carefully around the power mark.
 
-        Examples:
+        Returns
+        -------
+            `list[str]`
+                A list of strings where each string gradually reveals more of the tossup.
 
-        ```
-        generate_lines("In quantum mechanics, the square of this quantity...", 4) ->
+        Examples
+        --------
+        >>> self.generate_lines("In quantum mechanics, the square of this quantity...", 4)
         [
             "In quantum mechanics, the",
             "In quantum mechanics, the square of this quantity",
@@ -35,21 +45,16 @@ class Tossup(commands.Cog, name="tossup commands"):
             "In quantum mechanics, the square of this quantity is equal to h-bar...",
             ...
         ]
-        ```
         """
-
         text = text.strip().replace("\n", " ").split(" ")
         chunks = []
         seen_power = False
 
         for i in range(0, len(text), chunk_size):
-
             next_read = text[: i + chunk_size]
 
             if watch_power and not seen_power and "(*)" in next_read:
-
                 if not next_read[-1].endswith("(*)"):
-
                     power_chunk = next_read[: next_read.index("(*)") + 1]
                     chunks.append(" ".join(power_chunk))
 
@@ -62,22 +67,28 @@ class Tossup(commands.Cog, name="tossup commands"):
     async def play_tossup(self, ctx: Context, params: dict) -> tuple[str, str]:
         """Play a tossup question.
 
-        Args:
-            ctx (Context): Message context
-            params (dict): Parameters for the API request
+        Parameters
+        ----------
+            ctx : `discord.ext.commands.Context`
+                Message context.
+            params : `dict`
+                Parameters for the API request.
 
-        Returns:
-            tuple[str, str]: The formatted answer and the result of the tossup
+        Returns
+        -------
+            answer : `str`
+                The formatted answer to the tossup.
+            result : `str`
+                The result of the tossup.
 
-            Results can be one of the following:
+                Results can be one of the following:
 
-                `"ended by user"`: user ended the game
-                `"power"`: user answered correctly before the power mark
-                `"correct"`: user answered correctly after the power mark
-                `"neg"`: user answered incorrectly before the tossup is finished reading
-                `"dead"`: user answered incorrectly after the tossup is finished reading
+                    `"ended by user"`: user ended the game
+                    `"power"`: user answered correctly before the power mark
+                    `"correct"`: user answered correctly after the power mark
+                    `"neg"`: user answered incorrectly before the tossup is finished reading
+                    `"dead"`: user answered incorrectly after the tossup is finished reading
         """
-
         async with self.bot.session.post(f"{QBREADER_API}/random-question", json=params) as r:
             tossup = (await r.json(content_type="text/html"))[0]
 
@@ -109,13 +120,10 @@ class Tossup(commands.Cog, name="tossup commands"):
             a = tossup["answer"]
 
         async def edit_tossup():  # reader task
-
             for part in tossup_parts:
-
                 await asyncio.sleep(0.8)
 
                 async with lock:
-
                     embed = discord.Embed(title="Tossup", description=part, color=C_NEUTRAL)
                     embed = embed.set_footer(text=footer)
                     await tu.edit(embed=embed)
@@ -132,7 +140,6 @@ class Tossup(commands.Cog, name="tossup commands"):
         reader = asyncio.create_task(edit_tossup())
 
         async def listen_for_answer(timeout: float | None = None):  # buzzer task
-
             result = ""
 
             try:
@@ -162,7 +169,6 @@ class Tossup(commands.Cog, name="tossup commands"):
                 return "ended by user"
 
             async with lock:
-
                 await ctx.send(
                     embed=discord.Embed(
                         title="Buzz",
@@ -198,7 +204,6 @@ class Tossup(commands.Cog, name="tossup commands"):
                     return "neg"
 
                 while True:
-
                     if answer.startswith(f"{ctx.prefix}end"):
                         reader.cancel()
                         await tu.edit(
@@ -211,7 +216,6 @@ class Tossup(commands.Cog, name="tossup commands"):
                         return "ended by user"
 
                     match await check_answer(a, answer, self.bot.session):
-
                         case ("accept", _):
                             if can_power.is_set():
                                 result = "power"
@@ -273,14 +277,12 @@ class Tossup(commands.Cog, name="tossup commands"):
         listener = asyncio.create_task(listen_for_answer())
 
         try:
-
             reader_result = await reader
             if reader_result == "dead":
                 listener.cancel()
                 return a, "dead"
 
         except asyncio.CancelledError:  # reader cancelled while being awaited
-
             return a, await listener
 
     @commands.command(
@@ -288,7 +290,7 @@ class Tossup(commands.Cog, name="tossup commands"):
         description="returns a random tossup",
     )
     async def tossup(self, ctx: Context, *argv) -> None:
-
+        """Play a random tossup."""
         try:
             params = generate_params("tossup", argv)
         except ValueError as e:
@@ -296,7 +298,6 @@ class Tossup(commands.Cog, name="tossup commands"):
             return
 
         match await self.play_tossup(ctx, params):
-
             case (answer, "ended by user"):
                 await ctx.send(embed=discord.Embed(title="Ending Tossup", color=C_NEUTRAL))
 
@@ -322,8 +323,20 @@ class Tossup(commands.Cog, name="tossup commands"):
                     )
                 )
 
-    async def send_tk_end_stats(self, ctx: Context, stats: dict[str, int], argv) -> None:
+    async def send_tk_end_stats(
+        self, ctx: Context, stats: dict[str, int], filters: list[str]
+    ) -> None:
+        """Send the statistics for a TK session.
 
+        Parameters
+        ----------
+        ctx : `discord.ext.commands.Context`
+            Message context.
+        stats : dict[str, int]
+            Dictionary of stats.
+        filters : list[str]
+            List of filters used for the session.
+        """
         embed = discord.Embed(title="Session Stats", color=C_NEUTRAL)
         embed.add_field(name="Tossups", value=sum(stats.values()))
         embed.add_field(
@@ -344,7 +357,7 @@ class Tossup(commands.Cog, name="tossup commands"):
                 value="wow you really just started a session and ended it immediately",
             )
 
-        embed.add_field(name="Filters", value=f"`{' '.join(argv)}`", inline=False)
+        embed.add_field(name="Filters", value=f"`{' '.join(filters)}`", inline=False)
 
         await ctx.send(embed=embed)
 
@@ -352,8 +365,8 @@ class Tossup(commands.Cog, name="tossup commands"):
         name="tk",
         description="start a tk session",
     )
-    async def tk(self, ctx: Context, *argv) -> None:
-
+    async def tk(self, ctx: Context, *argv: list[str]) -> None:
+        """Start a tk session."""
         try:
             params = generate_params("tossup", argv)
         except ValueError as e:
@@ -363,9 +376,7 @@ class Tossup(commands.Cog, name="tossup commands"):
         tk_stats = {"power": 0, "correct": 0, "neg": 0, "dead": 0}
 
         while True:
-
             match await self.play_tossup(ctx, params):
-
                 case (answer, "ended by user"):
                     await self.send_tk_end_stats(ctx, tk_stats, argv)
                     return
@@ -417,8 +428,9 @@ class Tossup(commands.Cog, name="tossup commands"):
         description="alias for tossup",
     )
     async def tu(self, ctx: Context, *argv) -> None:
+        """Alias for `self.tossup()`."""
         await self.tossup(ctx, *argv)
 
 
-async def setup(bot):
+async def setup(bot):  # noqa: D103
     await bot.add_cog(Tossup(bot))

@@ -8,7 +8,9 @@ from discord.ext.commands import Bot, Context
 from lib.consts import C_ERROR, C_SUCCESS
 
 
-class Admin(commands.Cog, name="admin and dev testing commands"):
+class Admin(commands.Cog, name="admin and dev commands"):
+    """Command class for admin and dev commands."""
+
     def __init__(self, bot: Bot):
         self.bot = bot
 
@@ -17,7 +19,8 @@ class Admin(commands.Cog, name="admin and dev testing commands"):
         description="kill bot",
     )
     @commands.is_owner()
-    async def shutdown(self, ctx: Context) -> None:
+    async def kill(self, ctx: Context) -> None:
+        """Close all HTTP sessions and end the bot process."""
         embed = discord.Embed(description="bot killed by owner", color=C_SUCCESS)
         await ctx.send(embed=embed)
         await self.bot.session.close()
@@ -28,6 +31,7 @@ class Admin(commands.Cog, name="admin and dev testing commands"):
         description="manage extensions",
     )
     async def cog(self, ctx: Context) -> None:
+        """Group command for extension management."""
         if ctx.invoked_subcommand is None:
             embed = discord.Embed(
                 title="No subcommand provided",
@@ -42,12 +46,11 @@ class Admin(commands.Cog, name="admin and dev testing commands"):
     )
     @commands.is_owner()
     async def load(self, ctx: Context, *exts: str) -> None:
-
+        """Load extensions."""
         if len(exts) == 1 and exts[0] == "*":
             exts = [ext[:-3] for ext in os.listdir("./bot/exts") if ext.endswith(".py")]
 
         for ext in exts:
-
             try:
                 await self.bot.load_extension(f"exts.{ext}")
             except Exception as e:
@@ -69,12 +72,11 @@ class Admin(commands.Cog, name="admin and dev testing commands"):
     )
     @commands.is_owner()
     async def unload(self, ctx: Context, *exts: str) -> None:
-
+        """Unload extensions."""
         if len(exts) == 1 and exts[0] == "*":
             exts = [ext[:-3] for ext in os.listdir("./bot/exts") if ext.endswith(".py")]
 
         for ext in exts:
-
             try:
                 await self.bot.unload_extension(f"exts.{ext}")
             except Exception as e:
@@ -95,12 +97,11 @@ class Admin(commands.Cog, name="admin and dev testing commands"):
     )
     @commands.is_owner()
     async def reload(self, ctx: Context, *exts: str) -> None:
-
+        """Reload extensions."""
         if len(exts) == 1 and exts[0] == "*":
             exts = [ext[:-3] for ext in os.listdir("./bot/exts") if ext.endswith(".py")]
 
         for ext in exts:
-
             try:
                 await self.bot.reload_extension(f"exts.{ext}")
             except Exception as e:
@@ -116,5 +117,5 @@ class Admin(commands.Cog, name="admin and dev testing commands"):
             await ctx.send(embed=embed)
 
 
-async def setup(bot):
+async def setup(bot):  # noqa: D103
     await bot.add_cog(Admin(bot))

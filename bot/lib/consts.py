@@ -4,13 +4,11 @@ import os
 from json import load
 
 try:
-
     from dotenv import load_dotenv
 
     load_dotenv()
 
 except ImportError:
-
     if os.path.exists(".env"):
         print(
             ".env file found but dotenv is not installed, please install the dev dependencies with 'poetry install'"  # noqa: E501
