@@ -1,16 +1,24 @@
 # qb-bot
 
+[![release](https://img.shields.io/github/v/release/g3ner1c/qb-bot?include_prereleases)](https://github.com/g3ner1c/qb-bot/releases)
+![python](https://img.shields.io/badge/python-3.10-blue)
+[![license](https://img.shields.io/github/license/g3ner1c/qb-bot)](./LICENSE)
+[![build](https://img.shields.io/github/actions/workflow/status/g3ner1c/qb-bot/lint.yml?branch=main)](https://github.com/g3ner1c/qb-bot/actions/workflows/lint.yml)
+![deploy](https://img.shields.io/github/deployments/g3ner1c/qb-bot/qb-bot?label=deploy)
+[![welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://makeapullrequest.com)
+[![black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 An open-source quizbowl discord bot.
 
 All data is sourced from [QB Reader](https://www.qbreader.org/) (check out its [repo](https://www.github.com/qbreader/website) as well!) via its [API](https://www.qbreader.org/api-info).
 
-Contributions are welcome! I licensed this under [AGPLv3](./LICENSE) specifically to encourage contributions.
+Contributions are welcome! I licensed this under [AGPL-3.0](./LICENSE) specifically to encourage contributions.
 
 ## Running the bot
 
 ### Requirements
 
-This bot requires ***Python 3.10 or higher*** and a discord bot token. You can get a token by creating a new application on the [Discord Developer Portal](https://discord.com/developers/applications).
+This bot requires ***Python 3.10*** and a discord bot token. You can get a token by creating a new application on the [Discord Developer Portal](https://discord.com/developers/applications).
 
 Make sure you have [Poetry](https://python-poetry.org/) installed as well, if not, you can install it with:
 
