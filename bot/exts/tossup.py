@@ -98,8 +98,6 @@ class Tossup(commands.Cog, name="tossup commands"):
 
         tu_finished = asyncio.Event()
 
-        print("power possible?", can_power.is_set())
-
         embed = discord.Embed(title="Tossup", description="", color=C_NEUTRAL)
 
         embed.set_footer(text=footer)
@@ -109,8 +107,6 @@ class Tossup(commands.Cog, name="tossup commands"):
             a = tossup["formatted_answer"]
         except KeyError:
             a = tossup["answer"]
-
-        print(tossup["answer"])
 
         async def edit_tossup():  # reader task
 
@@ -125,10 +121,7 @@ class Tossup(commands.Cog, name="tossup commands"):
                     await tu.edit(embed=embed)
                     if can_power.is_set() and "*" in part and not part.endswith("(*)"):
                         # include powers right on power mark
-                        print("power mark read")
-
                         can_power.clear()
-                        print("power possible?", can_power.is_set())
 
             tu_finished.set()
 
@@ -151,7 +144,6 @@ class Tossup(commands.Cog, name="tossup commands"):
                 )
 
             except asyncio.TimeoutError:
-                print("no answer")
                 reader.cancel()
                 await tu.edit(
                     embed=discord.Embed(
@@ -170,8 +162,6 @@ class Tossup(commands.Cog, name="tossup commands"):
                 return "ended by user"
 
             async with lock:
-
-                print("buzz")
 
                 await ctx.send(
                     embed=discord.Embed(
@@ -195,7 +185,6 @@ class Tossup(commands.Cog, name="tossup commands"):
                     ).content
 
                 except asyncio.TimeoutError:  # no answer on buzz
-                    print("no answer")
                     reader.cancel()
                     await tu.edit(
                         embed=discord.Embed(
@@ -224,8 +213,6 @@ class Tossup(commands.Cog, name="tossup commands"):
                     match await check_answer(a, answer, self.bot.session):
 
                         case ("accept", _):
-                            print("correct")
-                            print("power possible?", can_power.is_set())
                             if can_power.is_set():
                                 result = "power"
                             else:
@@ -233,7 +220,6 @@ class Tossup(commands.Cog, name="tossup commands"):
                             break
 
                         case ("reject", _):
-                            print("incorrect")
                             if tu_finished.is_set():
                                 result = "dead"
                             else:
@@ -248,7 +234,6 @@ class Tossup(commands.Cog, name="tossup commands"):
                                     color=C_NEUTRAL,
                                 )
                             )
-                            print("prompt")
 
                             try:
                                 answer = (
@@ -261,7 +246,6 @@ class Tossup(commands.Cog, name="tossup commands"):
                                 ).content
 
                             except asyncio.TimeoutError:
-                                print("no answer")
                                 if tu_finished.is_set():
                                     result = "dead"
                                 else:
@@ -278,8 +262,7 @@ class Tossup(commands.Cog, name="tossup commands"):
                             )
                             return "ended by user"
 
-                print(reader.cancel())
-                print("reader cancelled")
+                reader.cancel()
                 await tu.edit(
                     embed=discord.Embed(
                         title="Tossup", description=tossup_parts[-1], color=C_NEUTRAL
