@@ -46,12 +46,12 @@ class Tossup(commands.Cog, name="tossup commands"):
             ...
         ]
         """
-        text = text.strip().replace("\n", " ").split(" ")
+        words = text.strip().replace("\n", " ").split(" ")
         chunks = []
         seen_power = False
 
-        for i in range(0, len(text), chunk_size):
-            next_read = text[: i + chunk_size]
+        for i in range(0, len(words), chunk_size):
+            next_read = words[: i + chunk_size]
 
             if watch_power and not seen_power and "(*)" in next_read:
                 if not next_read[-1].endswith("(*)"):

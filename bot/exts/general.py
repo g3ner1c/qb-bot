@@ -22,7 +22,7 @@ class General(commands.Cog, name="general commands"):
         """Check bot latency."""
         embed = discord.Embed(
             title="Still alive!",
-            description=f"latency: {round(self.bot.latency * 1000, 3)}ms.",
+            description=f"Latency: {round(self.bot.latency * 1000, 3)}ms.",
             color=C_NEUTRAL,
         )
         await ctx.send(embed=embed)
