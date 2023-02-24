@@ -1,6 +1,7 @@
 # qb-bot
 
-[![release](https://img.shields.io/github/v/release/g3ner1c/qb-bot?include_prereleases)](https://github.com/g3ner1c/qb-bot/releases)
+[![latest](https://img.shields.io/github/v/release/g3ner1c/qb-bot?include_prereleases&color=blue)](https://github.com/g3ner1c/qb-bot/releases)
+[![release](https://img.shields.io/github/commits-since/g3ner1c/qb-bot/latest?include_prereleases)](https://github.com/g3ner1c/qb-bot/releases)
 ![python](https://img.shields.io/badge/python-3.10-blue)
 [![license](https://img.shields.io/github/license/g3ner1c/qb-bot)](./LICENSE)
 [![build](https://img.shields.io/github/actions/workflow/status/g3ner1c/qb-bot/lint.yml?branch=main)](https://github.com/g3ner1c/qb-bot/actions/workflows/lint.yml)
