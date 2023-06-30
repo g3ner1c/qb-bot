@@ -29,8 +29,8 @@ class Bonus(commands.Cog, name="bonus commands"):
             `str | int`
                 `"ended by user"` if the user ended the game, otherwise the number of points.
         """
-        async with self.bot.session.post(f"{QBREADER_API}/random-question", json=params) as r:
-            bonus = (await r.json(content_type="text/html"))[0]
+        async with self.bot.session.get(f"{QBREADER_API}/random-bonus", params=params) as r:
+            bonus = (await r.json())["bonuses"][0]
 
         points = 0
 
@@ -132,7 +132,8 @@ class Bonus(commands.Cog, name="bonus commands"):
     async def bonus(self, ctx: Context, *argv) -> None:
         """Play a random bonus."""
         try:
-            params = generate_params("bonus", argv)
+            params = generate_params(argv)
+            params["threePartBonuses"] = "true"
         except ValueError as e:
             await ctx.send(embed=discord.Embed(title=str(e), color=C_ERROR))
             return
@@ -152,7 +153,8 @@ class Bonus(commands.Cog, name="bonus commands"):
     async def pk(self, ctx: Context, *argv) -> None:
         """Start a pk session."""
         try:
-            params = generate_params("bonus", argv)
+            params = generate_params(argv)
+            params["threePartBonuses"] = "true"
         except ValueError as e:
             await ctx.send(embed=discord.Embed(title=str(e), color=C_ERROR))
             return

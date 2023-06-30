@@ -130,13 +130,11 @@ def parse_subcats(subcats: list[str]) -> list[str]:
     return sorted(set(sum(map(parse, subcats), [])))
 
 
-def generate_params(question_type: str, argv: list[str]) -> dict:
+def generate_params(argv: list[str]) -> dict:
     """Generate paramenters for a request to the random question API.
 
     Parameters
     ----------
-        question_type : `str`
-            The type of question to request. Can be "tossup" or "bonus".
         argv : `list[str]`
             A list of arguments to parse, straight from user input.
 
@@ -145,7 +143,7 @@ def generate_params(question_type: str, argv: list[str]) -> dict:
         `dict`
             A dictionary of parameters to pass to the API.
     """
-    params = {"questionType": question_type}
+    params = {}
 
     diffs = []
     cats = []
@@ -196,4 +194,5 @@ async def check_answer(
         f"{QBREADER_API}/check-answer",
         params={"answerline": answerline, "givenAnswer": answer},
     ) as r:
-        return tuple(await r.json(content_type="text/html"))
+        data = await r.json()
+        return data["directive"], data["directedPrompt"]

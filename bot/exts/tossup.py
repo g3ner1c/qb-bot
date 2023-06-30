@@ -89,8 +89,8 @@ class Tossup(commands.Cog, name="tossup commands"):
                     `"neg"`: user answered incorrectly before the tossup is finished reading
                     `"dead"`: user answered incorrectly after the tossup is finished reading
         """
-        async with self.bot.session.post(f"{QBREADER_API}/random-question", json=params) as r:
-            tossup = (await r.json(content_type="text/html"))[0]
+        async with self.bot.session.get(f"{QBREADER_API}/random-tossup", params=params) as r:
+            tossup = (await r.json())["tossups"][0]
 
         tossup_parts = self.generate_lines(tossup["question"], 5)
 
@@ -292,7 +292,7 @@ class Tossup(commands.Cog, name="tossup commands"):
     async def tossup(self, ctx: Context, *argv) -> None:
         """Play a random tossup."""
         try:
-            params = generate_params("tossup", argv)
+            params = generate_params(argv)
         except ValueError as e:
             await ctx.send(embed=discord.Embed(title=str(e), color=C_ERROR))
             return
@@ -368,7 +368,7 @@ class Tossup(commands.Cog, name="tossup commands"):
     async def tk(self, ctx: Context, *argv: list[str]) -> None:
         """Start a tk session."""
         try:
-            params = generate_params("tossup", argv)
+            params = generate_params(argv)
         except ValueError as e:
             await ctx.send(embed=discord.Embed(title=str(e), color=C_ERROR))
             return
