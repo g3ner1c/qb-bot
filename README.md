@@ -30,7 +30,7 @@ curl -sSL https://install.python-poetry.org | python3 -
 Then, clone the repository and run `poetry install` to install the dependencies:
 
 ```sh
-git clone
+git clone https://github.com/g3ner1c/qb-bot
 cd qb-bot
 poetry install
 ```
